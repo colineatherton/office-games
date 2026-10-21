@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Office Games</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    background: #13151f;
+    color: #eef0f6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    padding: 2rem;
+  }
+  h1 { font-size: 2.6rem; letter-spacing: 1px; }
+  h1 span { color: #ffd43b; }
+  p.sub { color: #9aa0b5; }
+  .games { display: flex; flex-wrap: wrap; gap: 1.2rem; justify-content: center; }
+  a.game-card {
+    display: block;
+    width: 240px;
+    padding: 1.6rem;
+    background: #1d2030;
+    border: 1px solid #2d3148;
+    border-radius: 14px;
+    text-decoration: none;
+    color: inherit;
+    transition: transform .12s ease, border-color .12s ease;
+  }
+  a.game-card:hover { transform: translateY(-4px); border-color: #ffd43b; }
+  .game-card .emoji { font-size: 2.4rem; }
+  .game-card h2 { font-size: 1.2rem; margin: .6rem 0 .3rem; }
+  .game-card p { font-size: .85rem; color: #9aa0b5; }
+  .game-card.soon { opacity: .45; pointer-events: none; }
+</style>
+</head>
+<body>
+  <h1>🎉 Office <span>Games</span></h1>
+  <p class="sub">Monthly social hour — bring your A-game.</p>
+  <div class="games">
+    <a class="game-card" href="pictionary/">
+      <div class="emoji">🎨</div>
+      <h2>Pictionary</h2>
+      <p>Red vs Blue. Draw, guess, argue about whether that's a horse or a dog.</p>
+    </a>
+    <a class="game-card" href="telephone/">
+      <div class="emoji">📞</div>
+      <h2>Drawing Telephone</h2>
+      <p>Write → draw → describe → draw. Watch your sentence mutate into nonsense.</p>
+    </a>
+    <a class="game-card soon" href="#">
+      <div class="emoji">🧠</div>
+      <h2>Quiz Night</h2>
+      <p>Coming soon…</p>
+    </a>
+  </div>
+</body>
+</html>
