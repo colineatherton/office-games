@@ -52,10 +52,11 @@
         <button id="btn-copy-link" class="btn small">Copy invite link</button>
       </div>
       <div class="how-to">
-        <strong>How it works:</strong> the board shows 24 foreign words — their
-        languages, but not their meanings. Click <em>two words that mean the same
-        thing</em> to claim them for your team. Wrong pair? Your whole team is
-        locked out for 4 seconds. Most tiles wins.
+        <strong>Two modes:</strong> in <em>Pair Match</em> the board shows 24 foreign
+        words — click <em>two words that mean the same thing</em> to claim them.
+        In <em>Translation Hunt</em> (easier) one English word is shown — race to
+        click its 5 translations hiding among 15 decoys. Either way: wrong click =
+        your whole team locked out for 4 seconds. Most points wins.
       </div>
       <p class="hint">Click a team to switch sides. Each team needs at least one player.</p>
       <div class="teams-row">
@@ -70,6 +71,12 @@
       </div>
       <div id="lobby-host-controls" class="hidden">
         <div class="settings-row">
+          <label>Mode
+            <select id="set-mode">
+              <option value="classic" selected>Pair Match (classic)</option>
+              <option value="hunt">Translation Hunt (easier)</option>
+            </select>
+          </label>
           <label>Rounds
             <select id="set-rounds">
               <option value="3">3</option>
@@ -104,6 +111,10 @@
         <p class="hint side-hint">Click two words that mean the same thing.</p>
       </aside>
       <div id="board-wrap">
+        <div id="hunt-target" class="hidden">🔎 Find all translations of:
+          <strong id="hunt-target-word">?</strong>
+          <span class="muted">— 5 hiding below, first click wins each!</span>
+        </div>
         <div id="board"></div>
         <div id="lock-overlay" class="hidden">
           <div class="lock-box">🔒 Wrong pair!<br><span id="lock-count">4</span></div>

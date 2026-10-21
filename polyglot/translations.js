@@ -255,4 +255,40 @@ export const MEANINGS = [
     { w: "sonho", lang: "Portuguese" }, { w: "droom", lang: "Dutch" },
     { w: "sen", lang: "Polish" }, { w: "rüya", lang: "Turkish" },
   ]},
+  { english: "hello", words: [
+    { w: "hola", lang: "Spanish" }, { w: "bonjour", lang: "French" },
+    { w: "hallo", lang: "German" }, { w: "ciao", lang: "Italian" },
+    { w: "olá", lang: "Portuguese" }, { w: "cześć", lang: "Polish" },
+    { w: "merhaba", lang: "Turkish" }, { w: "halo", lang: "Indonesian" },
+  ]},
+  { english: "thank you", words: [
+    { w: "gracias", lang: "Spanish" }, { w: "merci", lang: "French" },
+    { w: "danke", lang: "German" }, { w: "grazie", lang: "Italian" },
+    { w: "obrigado", lang: "Portuguese" }, { w: "bedankt", lang: "Dutch" },
+    { w: "dziękuję", lang: "Polish" }, { w: "kiitos", lang: "Finnish" },
+  ]},
+  { english: "goodbye", words: [
+    { w: "adiós", lang: "Spanish" }, { w: "au revoir", lang: "French" },
+    { w: "tschüss", lang: "German" }, { w: "arrivederci", lang: "Italian" },
+    { w: "adeus", lang: "Portuguese" }, { w: "tot ziens", lang: "Dutch" },
+    { w: "do widzenia", lang: "Polish" }, { w: "hej då", lang: "Swedish" },
+  ]},
+  { english: "please", words: [
+    { w: "por favor", lang: "Spanish" }, { w: "s'il vous plaît", lang: "French" },
+    { w: "bitte", lang: "German" }, { w: "per favore", lang: "Italian" },
+    { w: "alsjeblieft", lang: "Dutch" }, { w: "proszę", lang: "Polish" },
+    { w: "lütfen", lang: "Turkish" }, { w: "prosím", lang: "Czech" },
+  ]},
+  { english: "friend", words: [
+    { w: "amigo", lang: "Spanish" }, { w: "ami", lang: "French" },
+    { w: "Freund", lang: "German" }, { w: "amico", lang: "Italian" },
+    { w: "vriend", lang: "Dutch" }, { w: "przyjaciel", lang: "Polish" },
+    { w: "arkadaş", lang: "Turkish" }, { w: "teman", lang: "Indonesian" },
+  ]},
+  { english: "love", words: [
+    { w: "amor", lang: "Spanish" }, { w: "amour", lang: "French" },
+    { w: "Liebe", lang: "German" }, { w: "amore", lang: "Italian" },
+    { w: "liefde", lang: "Dutch" }, { w: "miłość", lang: "Polish" },
+    { w: "aşk", lang: "Turkish" }, { w: "cinta", lang: "Indonesian" },
+  ]},
 ];

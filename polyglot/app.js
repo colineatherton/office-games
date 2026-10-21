@@ -89,7 +89,7 @@ $("btn-create").addEventListener("click", async () => {
       createdAt: serverTimestamp(),
       hostId: pid,
       state: "lobby",
-      settings: { rounds: 5 },
+      settings: { rounds: 5, mode: "classic" },
       scores: { red: 0, blue: 0 },
       teamLockedUntil: { red: 0, blue: 0 },
     });
@@ -187,8 +187,31 @@ function makeRound(used) {
     }
   }
   shuffle(tiles);
-  return { round: { tiles, meanings }, used: newUsed };
+  return { round: { mode: "classic", tiles, meanings }, used: newUsed };
 }
+
+// Hunt mode board: one target meaning, 5 of its translations + 15 decoys
+// (one per other meaning, so a decoy can never belong to the target).
+function makeHuntRound(used) {
+  let avail = MEANINGS.map((_, i) => i).filter((i) => !used[MEANINGS[i].english]);
+  if (!avail.length) { used = {}; avail = MEANINGS.map((_, i) => i); }
+  const ti = avail[Math.floor(Math.random() * avail.length)];
+  const target = MEANINGS[ti];
+  const newUsed = { ...used, [target.english]: true };
+
+  const tiles = shuffle([...target.words]).slice(0, 5)
+    .map((wo) => ({ w: wo.w, lang: wo.lang, good: true, claimed: "" }));
+  const others = shuffle(MEANINGS.map((_, i) => i).filter((i) => i !== ti));
+  for (const oi of others.slice(0, 15)) {
+    const ws = MEANINGS[oi].words;
+    const wo = ws[Math.floor(Math.random() * ws.length)];
+    tiles.push({ w: wo.w, lang: wo.lang, good: false, eng: MEANINGS[oi].english, claimed: "" });
+  }
+  shuffle(tiles);
+  return { round: { mode: "hunt", target: target.english, tiles }, used: newUsed };
+}
+
+const roundMaker = (m) => (m.settings?.mode === "hunt" ? makeHuntRound : makeRound);
 
 // ── State-machine transactions ────────────────────────────────────────────────
 function txMeta(fn) {
@@ -209,7 +232,7 @@ function startGame() {
   if (red < 1 || blue < 1) return; // button is disabled anyway
   txMeta((m) => {
     if (m.state !== "lobby") return;
-    const { round, used } = makeRound({});
+    const { round, used } = roundMaker(m)({});
     return {
       ...m,
       state: "playing",
@@ -254,12 +277,52 @@ function submitPair(i, j) {
   });
 }
 
+// Hunt mode: single click. Correct → claim (+10); wrong → tile dies, team
+// locked 4s (−5). The 5th correct claim ends the round and awards the majority
+// bonus inside the same transaction, so it fires exactly once.
+function submitHunt(i) {
+  const team = myTeam();
+  if (!team) return;
+  txMeta((m) => {
+    if (m.state !== "playing" || m.round?.mode !== "hunt" || !m.round.tiles) return;
+    const t = m.round.tiles[i];
+    if (!t || t.claimed || t.dead) return;
+    const now = nowSrv();
+    if ((m.teamLockedUntil?.[team] || 0) > now) return;
+
+    const next = {
+      ...m,
+      scores: { ...m.scores },
+      teamLockedUntil: { red: 0, blue: 0, ...m.teamLockedUntil },
+      round: { ...m.round, tiles: m.round.tiles.map((x) => ({ ...x })) },
+    };
+    if (t.good) {
+      next.round.tiles[i].claimed = team;
+      next.scores[team] = (next.scores[team] || 0) + 10;
+      const goods = next.round.tiles.filter((x) => x.good);
+      if (goods.every((x) => x.claimed)) {
+        const reds = goods.filter((x) => x.claimed === "red").length;
+        const bonusTeam = reds >= 3 ? "red" : "blue"; // 5 is odd — no ties
+        next.scores[bonusTeam] = (next.scores[bonusTeam] || 0) + 20;
+        next.round.bonusTeam = bonusTeam;
+        next.state = "roundEnd";
+        next.round.endsAt = now + 8000;
+      }
+    } else {
+      next.round.tiles[i].dead = true;
+      next.teamLockedUntil[team] = now + 4000;
+      next.scores[team] = (next.scores[team] || 0) - 5;
+    }
+    return next;
+  });
+}
+
 function advanceRound() {
   const expect = meta?.roundNum;
   txMeta((m) => {
     if (m.state !== "roundEnd" || m.roundNum !== expect) return;
     if (m.roundNum >= m.settings.rounds) return { ...m, state: "gameEnd" };
-    const { round, used } = makeRound(m.usedMeanings || {});
+    const { round, used } = roundMaker(m)(m.usedMeanings || {});
     return {
       ...m,
       state: "playing",
@@ -356,6 +419,7 @@ function renderLobby() {
   $("lobby-waiting").classList.toggle("hidden", isHost());
   if (isHost()) {
     $("set-rounds").value = String(meta.settings.rounds);
+    $("set-mode").value = meta.settings.mode || "classic";
     const { red, blue } = teamCounts();
     const ok = red >= 1 && blue >= 1;
     $("btn-start").disabled = !ok;
@@ -395,18 +459,27 @@ function renderGame() {
 function renderBoard() {
   const board = $("board");
   board.innerHTML = "";
+  const hunt = meta.round?.mode === "hunt";
   const tiles = meta.round?.tiles || [];
   const meanings = meta.round?.meanings || [];
+
+  $("hunt-target").classList.toggle("hidden", !hunt);
+  if (hunt) $("hunt-target-word").textContent = meta.round?.target || "?";
+
   tiles.forEach((t, i) => {
     const b = document.createElement("button");
     b.className = "tile";
     if (t.claimed) b.classList.add("claimed", t.claimed);
-    if (i === selectedIdx && !t.claimed) b.classList.add("selected");
+    if (t.dead) b.classList.add("dead");
+    if (!hunt && i === selectedIdx && !t.claimed) b.classList.add("selected");
+    const meaning = t.claimed
+      ? (hunt ? meta.round.target : meanings[t.m])
+      : (t.dead ? t.eng : null);
     b.innerHTML = `
       <span class="word">${esc(t.w)}</span>
       <span class="lang">${esc(t.lang)}</span>
-      ${t.claimed ? `<span class="meaning">= ${esc(meanings[t.m] || "?")}</span>` : ""}`;
-    if (!t.claimed) b.addEventListener("click", () => onTileClick(i));
+      ${meaning ? `<span class="meaning">= ${esc(meaning)}</span>` : ""}`;
+    if (!t.claimed && !t.dead) b.addEventListener("click", () => onTileClick(i));
     board.appendChild(b);
   });
 }
@@ -414,7 +487,11 @@ function renderBoard() {
 function onTileClick(i) {
   if (meta?.state !== "playing" || iAmLocked()) return;
   const t = meta.round?.tiles?.[i];
-  if (!t || t.claimed) return;
+  if (!t || t.claimed || t.dead) return;
+  if (meta.round.mode === "hunt") {
+    submitHunt(i);
+    return;
+  }
   if (selectedIdx === i) {
     selectedIdx = null;
   } else if (selectedIdx === null || meta.round.tiles[selectedIdx]?.claimed) {
@@ -455,20 +532,36 @@ function renderOverlay() {
   if (meta.state === "roundEnd" && meta.round) {
     ov.classList.remove("hidden");
     const tiles = meta.round.tiles || [];
-    const meanings = meta.round.meanings || [];
-    const counts = { red: 0, blue: 0 };
-    for (const t of tiles) if (counts[t.claimed] !== undefined) counts[t.claimed]++;
-    const groups = meanings.map((eng, mi) => {
-      const ws = tiles.filter((t) => t.m === mi)
-        .map((t) => `<span class="fw ${t.claimed}">${esc(t.w)}</span>`).join("");
-      return `<div class="reveal-group"><span class="eng">${esc(eng)}</span>${ws}</div>`;
-    }).join("");
     const secs = Math.max(0, Math.ceil(((meta.round.endsAt || 0) - nowSrv()) / 1000));
     const last = meta.roundNum >= meta.settings.rounds;
-    box.innerHTML = `
-      <h2>Round ${meta.roundNum} done — 🔴 ${counts.red} · 🔵 ${counts.blue} tiles</h2>
-      <div class="reveal-groups">${groups}</div>
-      <p class="hint">${last ? "Final scores" : "Next round"} in ${secs}…</p>`;
+    const footer = `<p class="hint">${last ? "Final scores" : "Next round"} in ${secs}…</p>`;
+
+    if (meta.round.mode === "hunt") {
+      const goods = tiles.filter((t) => t.good);
+      const counts = { red: 0, blue: 0 };
+      for (const t of goods) if (counts[t.claimed] !== undefined) counts[t.claimed]++;
+      const ws = goods.map((t) =>
+        `<span class="fw ${t.claimed}">${esc(t.w)} · ${esc(t.lang)}</span>`).join("");
+      const bt = meta.round.bonusTeam;
+      box.innerHTML = `
+        <h2>Round ${meta.roundNum} — "${esc(meta.round.target)}" found! 🔴 ${counts.red} · 🔵 ${counts.blue}</h2>
+        <div class="reveal-groups"><div class="reveal-group"><span class="eng">${esc(meta.round.target)}</span>${ws}</div></div>
+        ${bt ? `<p class="${bt === "red" ? "winner-red" : "winner-blue"}">🏆 Majority bonus +20 to ${bt === "red" ? "🔴 Red" : "🔵 Blue"}!</p>` : ""}
+        ${footer}`;
+    } else {
+      const meanings = meta.round.meanings || [];
+      const counts = { red: 0, blue: 0 };
+      for (const t of tiles) if (counts[t.claimed] !== undefined) counts[t.claimed]++;
+      const groups = meanings.map((eng, mi) => {
+        const ws = tiles.filter((t) => t.m === mi)
+          .map((t) => `<span class="fw ${t.claimed}">${esc(t.w)}</span>`).join("");
+        return `<div class="reveal-group"><span class="eng">${esc(eng)}</span>${ws}</div>`;
+      }).join("");
+      box.innerHTML = `
+        <h2>Round ${meta.roundNum} done — 🔴 ${counts.red} · 🔵 ${counts.blue} tiles</h2>
+        <div class="reveal-groups">${groups}</div>
+        ${footer}`;
+    }
   } else if (meta.state === "gameEnd") {
     ov.classList.remove("hidden");
     const red = meta.scores?.red || 0, blue = meta.scores?.blue || 0;
@@ -501,6 +594,8 @@ function switchTeam(team) {
 $("btn-start").addEventListener("click", startGame);
 $("set-rounds").addEventListener("change", (e) =>
   update(child(metaRef(), "settings"), { rounds: Number(e.target.value) }));
+$("set-mode").addEventListener("change", (e) =>
+  update(child(metaRef(), "settings"), { mode: e.target.value }));
 
 $("btn-copy-link").addEventListener("click", async () => {
   const url = `${location.origin}${location.pathname}#${roomCode}`;

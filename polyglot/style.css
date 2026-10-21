@@ -208,6 +208,28 @@ input:focus, select:focus { outline: 2px solid var(--accent); border-color: tran
 .tile.claimed { cursor: default; }
 .tile.claimed.red { background: rgba(224, 49, 49, .28); border-color: var(--red); }
 .tile.claimed.blue { background: rgba(25, 113, 194, .30); border-color: var(--blue); }
+.tile.dead {
+  cursor: default; opacity: .42;
+  background: #171925; border-color: var(--border);
+}
+.tile.dead:hover { transform: none; border-color: var(--border); }
+.tile.dead .word { text-decoration: line-through; }
+
+/* ── Hunt mode target banner ───────────── */
+#hunt-target {
+  background: var(--panel);
+  border: 1px solid rgba(255, 212, 59, .4);
+  border-radius: 10px;
+  padding: .7rem 1rem;
+  margin-bottom: .7rem;
+  font-size: 1.1rem;
+  text-align: center;
+}
+#hunt-target strong {
+  color: var(--accent); font-size: 1.45rem; text-transform: uppercase;
+  letter-spacing: .08em; margin: 0 .25em;
+}
+#hunt-target .muted { color: var(--muted); font-size: .85rem; display: block; margin-top: .2rem; }
 
 /* ── Lock overlay ──────────────────────── */
 #lock-overlay {

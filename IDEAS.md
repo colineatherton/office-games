@@ -37,6 +37,38 @@ synced through the same Firebase Realtime Database. Checked = built.
   types the answer against the clock. Built-in pack is titles only (lyric lines
   are copyrighted); host can add custom fill-in-the-blank questions in the lobby.
 
+## Next wave — suggested 2026-10
+
+- [ ] **🐑 Herd Mentality** — a prompt like "best biscuit?" or "most overrated
+  film?"; everyone answers secretly; you score only if your answer matches the
+  majority. No right answers, no content to author — the players are the content.
+  The office argument generator.
+- [ ] **🕵️‍♂️ Spyfall** — everyone is dealt the same location (beach, space
+  station, kitchen…) except one spy who gets nothing. Players interrogate each
+  other out loud on the call; the spy bluffs; vote the spy out, spy wins by
+  guessing the location. Needs only a location list.
+- [ ] **🔗 Connections** — NYT-style: 16 words hiding 4 groups of 4, teams race
+  to find the groups with 4 strikes each. We author the puzzle packs (in-joke
+  packs would be lethal).
+- [ ] **😏 Two Truths and a Lie** — the app collects 2 truths + 1 lie from each
+  player in the lobby, then runs a round per player: everyone votes on the lie,
+  points for fooling and detecting. Best new-joiner icebreaker.
+- [ ] **🔤 Letters Round** — Countdown-style: 9 random letters (pick vowel/
+  consonant), longest valid word in 30s, dictionary-checked, team scores.
+- [ ] **🔢 Numbers Round** — Countdown maths: 6 numbers, a target, 60s; type an
+  expression, the app validates it; closest team scores.
+- [ ] **🎲 Wits & Wagers** — a numeric question nobody knows exactly ("how long
+  is the Great Wall of China?"); everyone estimates, estimates are lined up, then
+  everyone bets on which is closest-without-going-over. Estimation + gambling.
+- [ ] **🏁 Typing Grand Prix** — same (original, non-copyrighted) paragraph for
+  all; live progress bars per player; team relay scoring. Instant chaos.
+- [ ] **🚩 Flag Zoom** — an emoji flag rendered huge but heavily pixelated/
+  blurred, sharpening over 20 seconds; first team to name the country scores —
+  earlier = more points. Zero image assets needed.
+- [ ] **💣 Minesweeper Duel** — one shared minesweeper board, teams alternate
+  reveals; safe cells score, mines cost points and pass the turn; flags earn
+  bonuses. Logic + blame.
+
 ## Smaller enhancement ideas
 
 - Custom word lists per room (let the host paste in-jokes before starting Pictionary).
