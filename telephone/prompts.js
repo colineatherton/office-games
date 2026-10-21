@@ -1,7 +1,7 @@
 // Fallback content used when someone runs out of time without typing anything.
 
 export const FALLBACK_PROMPTS = [
-  "a cat running a performance review",
+  "a cat chairing a very serious meeting",
   "the office printer finally gets its revenge",
   "a giraffe stuck in a revolving door",
   "Monday morning as a physical object",

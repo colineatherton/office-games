@@ -40,7 +40,7 @@ export const WORDS_HARD = [
   "hypnosis", "imagination", "inflation", "insomnia", "intuition", "jaywalking", "jet lag", "karma",
   "loophole", "lullaby", "metaphor", "midlife crisis", "migration", "mirage", "monday", "mortgage",
   "multitasking", "mute button", "networking", "nostalgia", "out of office", "overtime", "paranoia",
-  "passive aggressive", "patience", "peer pressure", "performance review", "photosynthesis",
+  "passive aggressive", "patience", "peer pressure", "photosynthesis",
   "plot twist", "privacy", "procrastination", "recession", "reflex", "reply all", "reunion", "rumor",
   "sarcasm", "shadow", "small talk", "sneeze", "spoiler", "spreadsheet", "stage fright", "suspicion",
   "team building", "telepathy", "time zone", "traffic jam", "translation", "trust fall", "vertigo",
