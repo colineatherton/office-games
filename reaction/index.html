@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reaction Duel — Office Games</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Shown only if firebase-config.js hasn't been filled in -->
+  <div id="screen-setup" class="screen hidden">
+    <div class="panel">
+      <h1>⚡ Reaction Duel</h1>
+      <h2>One-time setup needed</h2>
+      <p>This game syncs players through a free Firebase Realtime Database, and the
+         config hasn't been filled in yet.</p>
+      <ol>
+        <li>Go to <strong>console.firebase.google.com</strong> and create a project.</li>
+        <li>Build → <strong>Realtime Database</strong> → Create database → <strong>test mode</strong>.</li>
+        <li>Project settings → Your apps → add a <strong>Web app</strong>.</li>
+        <li>Copy the config object into <code>firebase-config.js</code> (repo root).</li>
+      </ol>
+      <p>Full walkthrough in the README. Takes about 5 minutes, free, no credit card.</p>
+    </div>
+  </div>
+
+  <!-- Join / create room -->
+  <div id="screen-join" class="screen hidden">
+    <div class="panel">
+      <h1>⚡ Reaction Duel</h1>
+      <p class="tagline">wait for green · click fast · no jumping the gun</p>
+      <label for="name-input">Your name</label>
+      <input id="name-input" maxlength="16" placeholder="e.g. Colin" autocomplete="off">
+      <label for="code-input">Room code</label>
+      <input id="code-input" maxlength="4" placeholder="ABCD" autocomplete="off" style="text-transform:uppercase">
+      <div class="btn-row">
+        <button id="btn-join" class="btn primary">Join room</button>
+        <button id="btn-create" class="btn">Create new room</button>
+      </div>
+      <p id="join-error" class="error hidden"></p>
+    </div>
+  </div>
+
+  <!-- Lobby -->
+  <div id="screen-lobby" class="screen hidden">
+    <div class="panel wide">
+      <h1>⚡ Reaction Duel</h1>
+      <div class="room-code-row">
+        <span>Room code:</span>
+        <strong id="lobby-code">----</strong>
+        <button id="btn-copy-link" class="btn small">Copy invite link</button>
+      </div>
+      <div class="how-to">
+        <strong>How it works:</strong> the screen goes red — <em>wait</em>. When it
+        flashes green, click (or smash spacebar) as fast as you can. Click early and
+        everyone hears about it. Fastest fingers earn the most points for their team.
+        Beware the occasional yellow fake-out.
+      </div>
+      <p class="hint">Click a team to switch sides.</p>
+      <div class="teams-row">
+        <div id="lobby-team-red" class="team-box red">
+          <h3>🔴 Red Team</h3>
+          <ul id="lobby-red-list"></ul>
+        </div>
+        <div id="lobby-team-blue" class="team-box blue">
+          <h3>🔵 Blue Team</h3>
+          <ul id="lobby-blue-list"></ul>
+        </div>
+      </div>
+      <div id="lobby-host-controls" class="hidden">
+        <div class="settings-row">
+          <label>Rounds
+            <select id="set-rounds">
+              <option value="5">5</option>
+              <option value="10" selected>10</option>
+              <option value="15">15</option>
+            </select>
+          </label>
+        </div>
+        <button id="btn-start" class="btn primary big">Start game</button>
+        <p id="start-hint" class="hint hidden"></p>
+      </div>
+      <p id="lobby-waiting" class="hint hidden">Waiting for the host to start…</p>
+      <button id="btn-leave-lobby" class="btn small ghost">Leave room</button>
+    </div>
+  </div>
+
+  <!-- Game -->
+  <div id="screen-game" class="screen hidden">
+    <header id="game-top">
+      <div class="team-chip red">🔴 <span id="score-red">0</span></div>
+      <div id="round-info">Round 1/10</div>
+      <div class="team-chip blue">🔵 <span id="score-blue">0</span></div>
+    </header>
+
+    <div id="stage" class="stage-neutral">
+      <div id="stage-text">GET READY…</div>
+      <div id="stage-sub"></div>
+    </div>
+
+    <div id="overlay" class="hidden">
+      <div id="overlay-content" class="panel"></div>
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Snake Pit — Office Games</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Shown only if firebase-config.js hasn't been filled in -->
+  <div id="screen-setup" class="screen hidden">
+    <div class="panel">
+      <h1>🐍 Snake Pit</h1>
+      <h2>One-time setup needed</h2>
+      <p>This game syncs players through a free Firebase Realtime Database, and the
+         config hasn't been filled in yet.</p>
+      <ol>
+        <li>Go to <strong>console.firebase.google.com</strong> and create a project.</li>
+        <li>Build → <strong>Realtime Database</strong> → Create database → <strong>test mode</strong>.</li>
+        <li>Project settings → Your apps → add a <strong>Web app</strong>.</li>
+        <li>Copy the config object into <code>firebase-config.js</code> (repo root).</li>
+      </ol>
+      <p>Full walkthrough in the README. Takes about 5 minutes, free, no credit card.</p>
+    </div>
+  </div>
+
+  <!-- Join / create room -->
+  <div id="screen-join" class="screen hidden">
+    <div class="panel">
+      <h1>🐍 Snake Pit</h1>
+      <p class="tagline">every snake in one pit · race for the apple · don't eat yourself</p>
+      <label for="name-input">Your name</label>
+      <input id="name-input" maxlength="16" placeholder="e.g. Colin" autocomplete="off">
+      <label for="code-input">Room code</label>
+      <input id="code-input" maxlength="4" placeholder="ABCD" autocomplete="off" style="text-transform:uppercase">
+      <div class="btn-row">
+        <button id="btn-join" class="btn primary">Join room</button>
+        <button id="btn-create" class="btn">Create new room</button>
+      </div>
+      <p id="join-error" class="error hidden"></p>
+    </div>
+  </div>
+
+  <!-- Lobby -->
+  <div id="screen-lobby" class="screen hidden">
+    <div class="panel wide">
+      <h1>🐍 Snake Pit</h1>
+      <div class="room-code-row">
+        <span>Room code:</span>
+        <strong id="lobby-code">----</strong>
+        <button id="btn-copy-link" class="btn small">Copy invite link</button>
+      </div>
+      <div class="how-to">
+        <strong>How it works:</strong> everyone's snake slithers in the same pit at
+        the same time. Grab the 🍎 before anyone else for <em>+10 team points</em> and
+        two extra segments. Walls and your own body kill you (other snakes are
+        harmless ghosts — you can't blame them). Most points when the clock runs
+        out wins. Arrows / WASD to steer.
+      </div>
+      <p class="hint">Click a team to switch sides.</p>
+      <div class="teams-row">
+        <div id="lobby-team-red" class="team-box red">
+          <h3>🔴 Red Team</h3>
+          <ul id="lobby-red-list"></ul>
+        </div>
+        <div id="lobby-team-blue" class="team-box blue">
+          <h3>🔵 Blue Team</h3>
+          <ul id="lobby-blue-list"></ul>
+        </div>
+      </div>
+      <div id="lobby-host-controls" class="hidden">
+        <div class="settings-row">
+          <label>Rounds
+            <select id="set-rounds">
+              <option value="1">1</option>
+              <option value="3" selected>3</option>
+              <option value="5">5</option>
+            </select>
+          </label>
+          <label>Round length
+            <select id="set-seconds">
+              <option value="60">60s</option>
+              <option value="90" selected>90s</option>
+              <option value="120">120s</option>
+            </select>
+          </label>
+        </div>
+        <button id="btn-start" class="btn primary big">Start game</button>
+      </div>
+      <p id="lobby-waiting" class="hint hidden">Waiting for the host to start…</p>
+      <button id="btn-leave-lobby" class="btn small ghost">Leave room</button>
+    </div>
+  </div>
+
+  <!-- Game -->
+  <div id="screen-game" class="screen hidden">
+    <header id="game-top">
+      <div id="round-info">Round 1/3</div>
+      <div class="team-pill red">🔴 <span id="score-red">0</span></div>
+      <div class="team-pill blue">🔵 <span id="score-blue">0</span></div>
+      <div id="apple-count">🍎 0</div>
+      <div id="personal-stats">📏 3 · 💀 0</div>
+      <div id="timer">--</div>
+    </header>
+    <div id="game-main">
+      <div id="canvas-wrap">
+        <canvas id="board" width="1080" height="720"></canvas>
+        <div id="dpad">
+          <button data-dir="up" class="dpad-btn dpad-up">▲</button>
+          <button data-dir="left" class="dpad-btn dpad-left">◀</button>
+          <button data-dir="right" class="dpad-btn dpad-right">▶</button>
+          <button data-dir="down" class="dpad-btn dpad-down">▼</button>
+        </div>
+        <div id="overlay" class="hidden">
+          <div id="overlay-content" class="panel"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

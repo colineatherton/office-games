@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Two Truths and a Lie — Office Games</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Shown only if firebase-config.js hasn't been filled in -->
+  <div id="screen-setup" class="screen hidden">
+    <div class="panel">
+      <h1>😏 Two Truths and a Lie</h1>
+      <h2>One-time setup needed</h2>
+      <p>This game syncs players through a free Firebase Realtime Database, and the
+         config hasn't been filled in yet.</p>
+      <ol>
+        <li>Go to <strong>console.firebase.google.com</strong> and create a project.</li>
+        <li>Build → <strong>Realtime Database</strong> → Create database → <strong>test mode</strong>.</li>
+        <li>Project settings → Your apps → add a <strong>Web app</strong>.</li>
+        <li>Copy the config object into <code>firebase-config.js</code> (repo root).</li>
+      </ol>
+      <p>Full walkthrough in the README. Takes about 5 minutes, free, no credit card.</p>
+    </div>
+  </div>
+
+  <!-- Join / create room -->
+  <div id="screen-join" class="screen hidden">
+    <div class="panel">
+      <h1>😏 Two Truths and a Lie</h1>
+      <p class="tagline">lie to your colleagues · for points</p>
+      <label for="name-input">Your name</label>
+      <input id="name-input" maxlength="16" placeholder="e.g. Colin" autocomplete="off">
+      <label for="code-input">Room code</label>
+      <input id="code-input" maxlength="4" placeholder="ABCD" autocomplete="off" style="text-transform:uppercase">
+      <div class="btn-row">
+        <button id="btn-join" class="btn primary">Join room</button>
+        <button id="btn-create" class="btn">Create new room</button>
+      </div>
+      <p id="join-error" class="error hidden"></p>
+    </div>
+  </div>
+
+  <!-- Lobby -->
+  <div id="screen-lobby" class="screen hidden">
+    <div class="panel wide">
+      <h1>😏 Two Truths and a Lie</h1>
+      <div class="room-code-row">
+        <span>Room code:</span>
+        <strong id="lobby-code">----</strong>
+        <button id="btn-copy-link" class="btn small">Copy invite link</button>
+      </div>
+      <div class="lobby-players-box">
+        <h3>Players <span id="locked-count"></span></h3>
+        <ul id="lobby-player-list"></ul>
+      </div>
+      <div class="statements-form">
+        <h3>Your statements</h3>
+        <p class="hint">Keep it fun — holidays, hobbies, childhood, food opinions.
+           Nobody sees which is which until the reveal.</p>
+        <label for="truth1-input">Truth #1</label>
+        <input id="truth1-input" maxlength="100" placeholder="something true about you…" autocomplete="off">
+        <label for="truth2-input">Truth #2</label>
+        <input id="truth2-input" maxlength="100" placeholder="another true thing…" autocomplete="off">
+        <label for="lie-input">The lie 🤫</label>
+        <input id="lie-input" maxlength="100" placeholder="a convincing lie…" autocomplete="off">
+        <button id="btn-lock" class="btn primary">Lock in ✔</button>
+        <p id="lock-status" class="hint hidden">✔ Locked in — you can still edit until the game starts.</p>
+        <p id="lock-error" class="error hidden"></p>
+      </div>
+      <div id="lobby-host-controls" class="hidden">
+        <button id="btn-start" class="btn primary big" disabled>Start game</button>
+      </div>
+      <p id="lobby-waiting" class="hint hidden">Waiting for the host to start…</p>
+      <button id="btn-leave-lobby" class="btn small ghost">Leave room</button>
+    </div>
+  </div>
+
+  <!-- Game -->
+  <div id="screen-game" class="screen hidden">
+    <header id="game-top">
+      <div id="round-info">Round 1/5</div>
+      <div id="subject-label">&nbsp;</div>
+      <div id="timer">--</div>
+    </header>
+
+    <div id="game-main">
+      <p id="status-banner" class="status-banner hidden"></p>
+      <div id="cards"></div>
+      <p id="vote-status" class="hint"></p>
+      <div id="reveal-extra" class="hidden">
+        <p id="reveal-prompt" class="reveal-prompt"></p>
+        <button id="btn-next" class="btn primary big hidden">Next ▶</button>
+      </div>
+    </div>
+
+    <!-- Game end -->
+    <div id="end-overlay" class="overlay hidden">
+      <div class="panel">
+        <h2>🏁 Final scores</h2>
+        <ol id="leaderboard"></ol>
+        <div id="end-controls"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

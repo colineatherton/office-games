@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Masterpiece — Office Games</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Shown only if firebase-config.js hasn't been filled in -->
+  <div id="screen-setup" class="screen hidden">
+    <div class="panel">
+      <h1>🏅 Masterpiece</h1>
+      <h2>One-time setup needed</h2>
+      <p>This game syncs players through a free Firebase Realtime Database, and the
+         config hasn't been filled in yet.</p>
+      <ol>
+        <li>Go to <strong>console.firebase.google.com</strong> and create a project.</li>
+        <li>Build → <strong>Realtime Database</strong> → Create database → <strong>test mode</strong>.</li>
+        <li>Project settings → Your apps → add a <strong>Web app</strong>.</li>
+        <li>Copy the config object into <code>firebase-config.js</code> (repo root).</li>
+      </ol>
+      <p>Full walkthrough in the README. Takes about 5 minutes, free, no credit card.</p>
+    </div>
+  </div>
+
+  <!-- Join / create room -->
+  <div id="screen-join" class="screen hidden">
+    <div class="panel">
+      <h1>🏅 Masterpiece</h1>
+      <p class="tagline">draw the prompt · judge the gallery · claim the crown</p>
+      <label for="name-input">Your name</label>
+      <input id="name-input" maxlength="16" placeholder="e.g. Colin" autocomplete="off">
+      <label for="code-input">Room code</label>
+      <input id="code-input" maxlength="4" placeholder="ABCD" autocomplete="off" style="text-transform:uppercase">
+      <div class="btn-row">
+        <button id="btn-join" class="btn primary">Join room</button>
+        <button id="btn-create" class="btn">Create new room</button>
+      </div>
+      <p id="join-error" class="error hidden"></p>
+    </div>
+  </div>
+
+  <!-- Lobby -->
+  <div id="screen-lobby" class="screen hidden">
+    <div class="panel wide">
+      <h1>🏅 Masterpiece</h1>
+      <div class="room-code-row">
+        <span>Room code:</span>
+        <strong id="lobby-code">----</strong>
+        <button id="btn-copy-link" class="btn small">Copy invite link</button>
+      </div>
+      <div class="how-to">
+        <strong>How it works:</strong> everyone draws the <em>same</em> prompt.
+        Then the gallery opens — anonymous — and everyone votes for their
+        favourite. 10 points per vote. May the steadiest hand win.
+      </div>
+      <div class="lobby-players-box">
+        <h3>Players (need 3+)</h3>
+        <ul id="lobby-player-list"></ul>
+      </div>
+      <div id="lobby-host-controls" class="hidden">
+        <div class="settings-row">
+          <label>Rounds
+            <select id="set-rounds">
+              <option value="3" selected>3</option>
+              <option value="5">5</option>
+            </select>
+          </label>
+          <label>Drawing time
+            <select id="set-draw-seconds">
+              <option value="60">60s</option>
+              <option value="90" selected>90s</option>
+              <option value="120">120s</option>
+            </select>
+          </label>
+        </div>
+        <button id="btn-start" class="btn primary big">Start game</button>
+      </div>
+      <p id="lobby-waiting" class="hint hidden">Waiting for the host to start…</p>
+      <button id="btn-leave-lobby" class="btn small ghost">Leave room</button>
+    </div>
+  </div>
+
+  <!-- Game -->
+  <div id="screen-game" class="screen hidden">
+    <header id="game-top">
+      <div id="round-info">Round 1/3</div>
+      <div id="task-label">&nbsp;</div>
+      <div id="timer">--</div>
+    </header>
+
+    <div id="game-main">
+
+      <!-- Drawing phase -->
+      <div id="view-draw" class="task-view hidden">
+        <div class="draw-prompt panel"><span>🎨 Draw:</span> <strong id="draw-prompt-text"></strong></div>
+        <div id="canvas-wrap">
+          <canvas id="board" width="1000" height="700"></canvas>
+          <div id="tools">
+            <div id="color-row"></div>
+            <div id="size-row"></div>
+            <button id="btn-undo" class="tool-btn" title="Undo">↩️</button>
+            <button id="btn-clear" class="tool-btn" title="Clear canvas">🗑️</button>
+            <button id="btn-submit-draw" class="btn primary">Done ✔</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Waiting for others -->
+      <div id="view-wait" class="task-view hidden">
+        <div class="panel">
+          <h2 id="wait-title">✅ Submitted!</h2>
+          <p class="hint">Waiting for the other artists…</p>
+          <ul id="wait-list"></ul>
+        </div>
+      </div>
+
+      <!-- Gallery: voting and results share this view -->
+      <div id="view-gallery" class="task-view hidden">
+        <div class="panel wide gallery-panel">
+          <h2 id="gallery-title">🖼 The Gallery</h2>
+          <p id="gallery-hint" class="hint"></p>
+          <div id="gallery-grid"></div>
+        </div>
+      </div>
+
+      <!-- Spectator (joined mid-round) -->
+      <div id="view-spectate" class="task-view hidden">
+        <div class="panel">
+          <h2>🍿 Round in progress</h2>
+          <p class="hint">You joined mid-round — you'll be handed a brush for the next one.</p>
+        </div>
+      </div>
+
+      <!-- Game end overlay -->
+      <div id="overlay" class="hidden">
+        <div id="overlay-content" class="panel"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

@@ -39,35 +39,67 @@ synced through the same Firebase Realtime Database. Checked = built.
 
 ## Next wave — suggested 2026-10
 
-- [ ] **🐑 Herd Mentality** — a prompt like "best biscuit?" or "most overrated
+- [x] **🐑 Herd Mentality** — a prompt like "best biscuit?" or "most overrated
   film?"; everyone answers secretly; you score only if your answer matches the
   majority. No right answers, no content to author — the players are the content.
   The office argument generator.
-- [ ] **🕵️‍♂️ Spyfall** — everyone is dealt the same location (beach, space
+- [x] **🕵️‍♂️ Spyfall** — everyone is dealt the same location (beach, space
   station, kitchen…) except one spy who gets nothing. Players interrogate each
   other out loud on the call; the spy bluffs; vote the spy out, spy wins by
   guessing the location. Needs only a location list.
-- [ ] **🔗 Connections** — NYT-style: 16 words hiding 4 groups of 4, teams race
+- [x] **🔗 Connections** — NYT-style: 16 words hiding 4 groups of 4, teams race
   to find the groups with 4 strikes each. We author the puzzle packs (in-joke
   packs would be lethal).
-- [ ] **😏 Two Truths and a Lie** — the app collects 2 truths + 1 lie from each
+- [x] **😏 Two Truths and a Lie** — the app collects 2 truths + 1 lie from each
   player in the lobby, then runs a round per player: everyone votes on the lie,
   points for fooling and detecting. Best new-joiner icebreaker.
-- [ ] **🔤 Letters Round** — Countdown-style: 9 random letters (pick vowel/
+- [x] **🔤 Letters Round** — Countdown-style: 9 random letters (pick vowel/
   consonant), longest valid word in 30s, dictionary-checked, team scores.
-- [ ] **🔢 Numbers Round** — Countdown maths: 6 numbers, a target, 60s; type an
+- [x] **🔢 Numbers Round** — Countdown maths: 6 numbers, a target, 60s; type an
   expression, the app validates it; closest team scores.
-- [ ] **🎲 Wits & Wagers** — a numeric question nobody knows exactly ("how long
+- [x] **🎲 Wits & Wagers** — a numeric question nobody knows exactly ("how long
   is the Great Wall of China?"); everyone estimates, estimates are lined up, then
   everyone bets on which is closest-without-going-over. Estimation + gambling.
-- [ ] **🏁 Typing Grand Prix** — same (original, non-copyrighted) paragraph for
+- [x] **🏁 Typing Grand Prix** — same (original, non-copyrighted) paragraph for
   all; live progress bars per player; team relay scoring. Instant chaos.
-- [ ] **🚩 Flag Zoom** — an emoji flag rendered huge but heavily pixelated/
+- [x] **🚩 Flag Zoom** — an emoji flag rendered huge but heavily pixelated/
   blurred, sharpening over 20 seconds; first team to name the country scores —
   earlier = more points. Zero image assets needed.
-- [ ] **💣 Minesweeper Duel** — one shared minesweeper board, teams alternate
+- [x] **💣 Minesweeper Duel** — one shared minesweeper board, teams alternate
   reveals; safe cells score, mines cost points and pass the turn; flags earn
   bonuses. Logic + blame.
+
+## Wave three — Claude's picks, 2026-10
+
+- [ ] **🧠 Memory Duel** — one shared grid of face-down emoji pairs; teams
+  alternate flips, a match scores and keeps the turn. Everyone sees every flip,
+  so paying attention during the other team's turn is the whole game.
+- [ ] **📈 Higher or Lower** — "Which country is bigger?", "Which came first?"
+  Streak-based: keep answering comparisons to grow a streak, bank or bust.
+  Stable facts only (areas, history dates), teams alternate.
+- [ ] **🏅 Masterpiece** — everyone draws the same prompt on their own canvas
+  (reusing the Pictionary canvas), then an anonymous gallery vote picks the
+  winner. Fibbage voting meets Pictionary drawing.
+- [ ] **⚡ Reaction Duel** — wait for the screen to flash green, click fast;
+  false starts are penalized and broadcast for maximum shame. Reaction time is
+  measured locally so network lag is fair. Team totals across rounds.
+- [ ] **🐍 Snake Pit** — everyone's snake in one arena at once, Frogger-style:
+  food spawns deterministically from a shared seed, your collisions are local,
+  other snakes are ghosts. Longest combined team length wins the round.
+- [ ] **🧮 Quick Maths** — rapid mental arithmetic chains ("17 + 8 × 2"), first
+  correct answer takes the points, difficulty ramps. Sudden-death final.
+- [ ] **🪜 Word Ladder Race** — teams race CAT → DOG changing one letter at a
+  time through valid words (reuses the Wordle dictionary). Fewest steps and
+  fastest time both score.
+- [ ] **🔡 Scattergories** — one letter, 8 categories, 90 seconds; answers that
+  duplicate another player's are cancelled; dubious answers get a group
+  thumbs-vote. The voting arguments are the content.
+- [ ] **🎹 Simon League** — the classic growing color/sound sequence, everyone
+  plays simultaneously on their own pad; last player standing earns their team
+  the round. Tension builds beautifully on a call.
+- [x] **🔤 Hangman Duel** — teams take turns guessing letters on the same hidden
+  phrase; correct letters score, the letter that completes the phrase scores
+  big, wrong guesses build the gallows against your team.
 
 ## Smaller enhancement ideas
 

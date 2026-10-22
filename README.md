@@ -18,6 +18,16 @@ Realtime Database — Google infrastructure, which company networks almost never
 | 🌍 [Polyglot](polyglot/) | 2+ | Match words across languages |
 | 🐸 [Frogger Rush](frogger/) | 2+ | Everyone hops at once, live arcade |
 | 🎤 [Finish the Line](lyrics/) | 2+ | Fill the missing word in famous song titles |
+| 🐑 [Herd Mentality](herd/) | 3+ | Match the majority answer, solo scores |
+| 🕵️‍♂️ [Spyfall](spyfall/) | 3+ | Find the spy by interrogation, solo scores |
+| 🔗 [Connections](connections/) | 2+ | Teams race the same 16-word puzzle |
+| 😏 [Two Truths and a Lie](twotruths/) | 3+ | Icebreaker voting, solo scores |
+| 🔤 [Letters Round](letters/) | 2+ | Countdown letters, best word per team |
+| 🔢 [Numbers Round](numbers/) | 2+ | Countdown maths with a real expression checker |
+| 🎲 [Wits & Wagers](wagers/) | 3+ | Estimate, then bet on the best estimate |
+| 🏁 [Typing Grand Prix](typing/) | 2+ | Live typing race lanes |
+| 🚩 [Flag Zoom](flagzoom/) | 2+ | Guess the sharpening flag (canvas-drawn, Windows-safe) |
+| 💣 [Minesweeper Duel](minesweeper/) | 2+ | Shared minefield, push-your-luck turns |
 
 More ideas in [IDEAS.md](IDEAS.md). Each game page explains its own rules;
 quick summaries below.
@@ -187,3 +197,41 @@ ___" · Bon Jovi); everyone types the answer against the clock, correct answers
 score for your team. The built-in pack is song *titles* only (lyric lines are
 copyrighted, and this repo is public) — but the host can type their own custom
 fill-in-the-blank questions in the lobby for anything-goes rounds.
+
+**🐑 Herd Mentality** — everyone secretly answers the same prompt ("best
+biscuit?"); anyone in the biggest matching group scores. The loneliest unique
+answer holds the 🐄 Pink Cow of shame. Individual scores, first to 8.
+
+**🕵️‍♂️ Spyfall** — everyone is dealt the same location except the spy.
+Interrogate each other out loud; call votes, or if you're the spy, guess the
+location before they catch you. Individual scores.
+
+**🔗 Connections** — both teams race the same NYT-style puzzle: 16 words, 4
+hidden groups, 4 strikes each. "One away!" taunts included. You see the other
+team's group count, never their board.
+
+**😏 Two Truths and a Lie** — everyone locks in two truths and a lie in the
+lobby; each round the group votes on one player's lie. Points for detecting,
+points for deceiving, 🏆 Best Liar crowned at the end.
+
+**🔤 Letters Round & 🔢 Numbers Round** — Countdown, basically. Letters: 9
+tiles, best word per team scores its length. Numbers: six numbers, a target,
+and a validator that enforces the classic rules (exact division only, no
+negative intermediates). Both one-shot submissions.
+
+**🎲 Wits & Wagers** — a numeric question nobody knows ("how long is the Great
+Wall?"); everyone estimates, then everyone bets on the estimate they trust.
+Closest without going over wins. Individual scores.
+
+**🏁 Typing Grand Prix** — the same (original, llama-heavy) paragraph for all;
+typos block you until fixed; live race lanes with little cars. Team relay
+scoring plus a 🏎️ fastest-WPM crown.
+
+**🚩 Flag Zoom** — a heavily pixelated flag sharpens over 25 seconds; first
+correct guess in chat scores more the earlier it lands. Flags are drawn on
+canvas (not emoji) so they render identically on every OS — and yes, guessing
+"Chad" on Romania counts.
+
+**💣 Minesweeper Duel** — one shared minefield, teams alternate push-your-luck
+turns: every safe cell +1, keep clicking or pass; a mine is −10 and ends your
+turn. First click always cascades.
