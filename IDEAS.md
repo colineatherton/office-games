@@ -71,35 +71,52 @@ synced through the same Firebase Realtime Database. Checked = built.
 
 ## Wave three — Claude's picks, 2026-10
 
-- [ ] **🧠 Memory Duel** — one shared grid of face-down emoji pairs; teams
+- [x] **🧠 Memory Duel** — one shared grid of face-down emoji pairs; teams
   alternate flips, a match scores and keeps the turn. Everyone sees every flip,
   so paying attention during the other team's turn is the whole game.
-- [ ] **📈 Higher or Lower** — "Which country is bigger?", "Which came first?"
+- [x] **📈 Higher or Lower** — "Which country is bigger?", "Which came first?"
   Streak-based: keep answering comparisons to grow a streak, bank or bust.
   Stable facts only (areas, history dates), teams alternate.
-- [ ] **🏅 Masterpiece** — everyone draws the same prompt on their own canvas
+- [x] **🏅 Masterpiece** — everyone draws the same prompt on their own canvas
   (reusing the Pictionary canvas), then an anonymous gallery vote picks the
   winner. Fibbage voting meets Pictionary drawing.
-- [ ] **⚡ Reaction Duel** — wait for the screen to flash green, click fast;
+- [x] **⚡ Reaction Duel** — wait for the screen to flash green, click fast;
   false starts are penalized and broadcast for maximum shame. Reaction time is
   measured locally so network lag is fair. Team totals across rounds.
-- [ ] **🐍 Snake Pit** — everyone's snake in one arena at once, Frogger-style:
+- [x] **🐍 Snake Pit** — everyone's snake in one arena at once, Frogger-style:
   food spawns deterministically from a shared seed, your collisions are local,
   other snakes are ghosts. Longest combined team length wins the round.
-- [ ] **🧮 Quick Maths** — rapid mental arithmetic chains ("17 + 8 × 2"), first
+- [x] **🧮 Quick Maths** — rapid mental arithmetic chains ("17 + 8 × 2"), first
   correct answer takes the points, difficulty ramps. Sudden-death final.
-- [ ] **🪜 Word Ladder Race** — teams race CAT → DOG changing one letter at a
+- [x] **🪜 Word Ladder Race** — teams race CAT → DOG changing one letter at a
   time through valid words (reuses the Wordle dictionary). Fewest steps and
   fastest time both score.
-- [ ] **🔡 Scattergories** — one letter, 8 categories, 90 seconds; answers that
+- [x] **🔡 Scattergories** — one letter, 8 categories, 90 seconds; answers that
   duplicate another player's are cancelled; dubious answers get a group
   thumbs-vote. The voting arguments are the content.
-- [ ] **🎹 Simon League** — the classic growing color/sound sequence, everyone
+- [x] **🎹 Simon League** — the classic growing color/sound sequence, everyone
   plays simultaneously on their own pad; last player standing earns their team
   the round. Tension builds beautifully on a call.
 - [x] **🔤 Hangman Duel** — teams take turns guessing letters on the same hidden
   phrase; correct letters score, the letter that completes the phrase scores
   big, wrong guesses build the gallows against your team.
+
+## Wave four — the drawing batch (Colin's brief: individual scores + leaderboards)
+
+- [x] **🖼️ Who Drew It?** — everyone draws the same prompt; the anonymous gallery
+  comes back and you match every drawing to its artist (+points per correct
+  link), plus vote 🏆 best (+points to the artist) and 💩 worst (−points).
+- [x] **✏️ Memory Sketch** — draw famous things from memory, no peeking: flags,
+  currency symbols, country outlines, landmarks, the Bluetooth symbol. Peers
+  vote most accurate and funniest; the real thing is shown for maximum pain.
+- [x] **🧟‍♀️ Monster Factory** — exquisite corpse: you draw a head, someone else
+  continues the torso from a 30px sliver, a third adds legs. Monsters assemble
+  in a synchronized reveal, then everyone votes for the finest abomination.
+- [x] **➰ One Line Wonder** — Pictionary, but the drawer gets exactly one
+  continuous stroke: pen up, canvas locks. Guessers race in chat.
+- [x] **🙈 Blind Canvas** — draw the prompt with invisible ink (you can't see
+  your own drawing until you submit). One-at-a-time comedy reveal, then votes
+  for most recognizable and funniest.
 
 ## Smaller enhancement ideas
 
