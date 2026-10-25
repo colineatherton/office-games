@@ -10,7 +10,7 @@ import {
   onValue, onChildAdded, onDisconnect, runTransaction, serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { firebaseConfig } from "../firebase-config.js";
-import { MOVIES, SONGS, THINGS, EMOJI_PALETTE } from "./prompts.js";
+import { MOVIES, SONGS, THINGS, EMOJI_PALETTE, EMOJI_KEYWORDS } from "./prompts.js";
 
 const $ = (id) => document.getElementById(id);
 
@@ -660,18 +660,24 @@ let compose = [];
 let composeRound = -1;
 let emojiWriteTimer = null;
 
-// Reset composition whenever a new round starts.
+// Reset composition (and any leftover search) whenever a new round starts.
 setInterval(() => {
   const n = meta?.round?.num ?? -1;
-  if (n !== composeRound) { composeRound = n; compose = []; }
+  if (n !== composeRound) {
+    composeRound = n;
+    compose = [];
+    if (searchInput.value) { searchInput.value = ""; filterPalette(); }
+  }
 }, 200);
 
 const palette = $("palette");
+const paletteButtons = []; // [emoji, button] in palette order
 for (const e of EMOJI_PALETTE) {
   const b = document.createElement("button");
   b.className = "emoji-btn";
   b.type = "button";
   b.textContent = e;
+  b.title = EMOJI_KEYWORDS[e] || "";
   b.addEventListener("click", () => {
     if (!(meta?.state === "playing" && isBuilder())) return;
     if (compose.length >= 40) return;
@@ -680,7 +686,29 @@ for (const e of EMOJI_PALETTE) {
     syncEmojis();
   });
   palette.appendChild(b);
+  paletteButtons.push([e, b]);
 }
+
+// Search filters the grid live by keyword (e.g. "croc" → 🐊, "red" → 🔴❤️…).
+// Hiding non-matches collapses the auto-fill grid into a flat list of matches;
+// clearing (or Escape) restores the full category-ordered grid.
+const searchInput = $("emoji-search");
+function filterPalette() {
+  const q = searchInput.value.trim().toLowerCase();
+  let shown = 0;
+  for (const [e, b] of paletteButtons) {
+    // Word-prefix match: "king" hits "king" but not "thinking".
+    const match = !q || EMOJI_KEYWORDS[e].split(" ").some((w) => w.startsWith(q));
+    b.classList.toggle("hidden", !match);
+    if (match) shown++;
+  }
+  $("no-matches").classList.toggle("hidden", shown > 0);
+}
+searchInput.addEventListener("input", filterPalette);
+searchInput.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") { searchInput.value = ""; filterPalette(); }
+  if (e.key === "Enter") e.preventDefault(); // never submit/steal the guess flow
+});
 
 $("btn-backspace").addEventListener("click", () => {
   if (!(meta?.state === "playing" && isBuilder())) return;

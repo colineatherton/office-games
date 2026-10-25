@@ -144,6 +144,8 @@
 </div>
 
 <div class="filters" id="filters">
+  <input id="game-search" type="search" placeholder="🔎 Search games…" autocomplete="off"
+         style="background:#0e101a;border:1px solid var(--border);border-radius:999px;color:var(--text);font-size:.85rem;padding:.32rem .85rem;width:170px;">
   <button class="chip active" data-f="all">All</button>
   <button class="chip" data-f="teams">🔴🔵 Teams</button>
   <button class="chip" data-f="solo">🙋 Solo scores</button>
@@ -600,17 +602,28 @@
   const chips = document.querySelectorAll(".chip");
   const cards = document.querySelectorAll(".card");
   const sections = document.querySelectorAll("section");
-  chips.forEach((chip) => chip.addEventListener("click", () => {
-    chips.forEach((c) => c.classList.toggle("active", c === chip));
-    const f = chip.dataset.f;
+  const search = document.getElementById("game-search");
+  let activeFormat = "all";
+
+  function applyFilters() {
+    const q = search.value.trim().toLowerCase();
     cards.forEach((card) => {
-      card.classList.toggle("hidden", f !== "all" && card.dataset.format !== f);
+      const formatOk = activeFormat === "all" || card.dataset.format === activeFormat;
+      const textOk = !q || card.textContent.toLowerCase().includes(q);
+      card.classList.toggle("hidden", !(formatOk && textOk));
     });
     sections.forEach((sec) => {
       const any = sec.querySelector(".card:not(.hidden)");
       sec.classList.toggle("hidden", !any);
     });
+  }
+
+  chips.forEach((chip) => chip.addEventListener("click", () => {
+    chips.forEach((c) => c.classList.toggle("active", c === chip));
+    activeFormat = chip.dataset.f;
+    applyFilters();
   }));
+  search.addEventListener("input", applyFilters);
 </script>
 </body>
 </html>

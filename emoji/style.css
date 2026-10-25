@@ -206,6 +206,10 @@ input:focus, select:focus { outline: 2px solid var(--accent); border-color: tran
 }
 #compose-controls { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
 #compose-controls .hint { margin-left: auto; }
+#emoji-search {
+  flex: 1; min-width: 160px; max-width: 280px;
+  font-size: .9rem; padding: .35rem .7rem;
+}
 .tool-btn {
   background: #0e101a; border: 1px solid var(--border); border-radius: 8px;
   color: var(--text);
