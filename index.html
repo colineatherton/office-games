@@ -5,221 +5,585 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Office Games</title>
 <style>
-  :root { color-scheme: dark; }
+  :root {
+    color-scheme: dark;
+    --bg: #13151f; --panel: #1d2030; --border: #2d3148;
+    --text: #eef0f6; --muted: #9aa0b5; --accent: #ffd43b;
+    --red: #e03131; --blue: #1971c2;
+  }
   * { box-sizing: border-box; margin: 0; }
   body {
     font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
-    background: #13151f;
-    color: #eef0f6;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 2rem;
-    padding: 2rem;
+    background: var(--bg); color: var(--text);
+    min-height: 100vh; padding: 2rem 1.2rem 4rem;
   }
+  .wrap { max-width: 1180px; margin: 0 auto; }
+
+  header { text-align: center; margin-bottom: 1.6rem; }
   h1 { font-size: 2.6rem; letter-spacing: 1px; }
-  h1 span { color: #ffd43b; }
-  p.sub { color: #9aa0b5; }
-  .games { display: flex; flex-wrap: wrap; gap: 1.2rem; justify-content: center; }
-  a.game-card {
-    display: block;
-    width: 240px;
-    padding: 1.6rem;
-    background: #1d2030;
-    border: 1px solid #2d3148;
-    border-radius: 14px;
-    text-decoration: none;
-    color: inherit;
-    transition: transform .12s ease, border-color .12s ease;
+  h1 span { color: var(--accent); }
+  .tagline { color: var(--muted); margin-top: .3rem; }
+  .intro {
+    margin: .9rem auto 0; max-width: 640px; color: var(--text);
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 10px; padding: .7rem 1rem; font-size: .95rem;
   }
-  a.game-card:hover { transform: translateY(-4px); border-color: #ffd43b; }
-  .game-card .emoji { font-size: 2.4rem; }
-  .game-card h2 { font-size: 1.2rem; margin: .6rem 0 .3rem; }
-  .game-card p { font-size: .85rem; color: #9aa0b5; }
-  .game-card.soon { opacity: .45; pointer-events: none; }
+  .intro a { color: var(--accent); }
+
+  /* Can't decide */
+  .decide { margin: 1.6rem 0 1.2rem; }
+  .decide h2 { font-size: 1.15rem; margin-bottom: .6rem; }
+  .decide-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: .7rem; }
+  .decide-tile {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 10px; padding: .7rem .9rem; font-size: .88rem;
+  }
+  .decide-tile strong { display: block; margin-bottom: .25rem; }
+  .decide-tile a { color: var(--accent); text-decoration: none; }
+  .decide-tile a:hover { text-decoration: underline; }
+  .decide-tile span.why { color: var(--muted); }
+
+  /* Filter bar */
+  .filters {
+    position: sticky; top: 0; z-index: 10;
+    background: var(--bg); padding: .8rem 0;
+    display: flex; flex-wrap: wrap; gap: .45rem; align-items: center;
+    border-bottom: 1px solid var(--border); margin-bottom: 1rem;
+  }
+  .chip {
+    background: var(--panel); border: 1px solid var(--border); color: var(--text);
+    border-radius: 999px; padding: .32rem .85rem; font-size: .85rem; cursor: pointer;
+  }
+  .chip:hover { filter: brightness(1.25); }
+  .chip.active { background: var(--accent); color: #1a1500; border-color: transparent; font-weight: 600; }
+  .filters .sep { color: var(--border); margin: 0 .2rem; }
+  .jump {
+    color: var(--muted); text-decoration: none; font-size: .85rem;
+    padding: .32rem .5rem; border-radius: 8px;
+  }
+  .jump:hover { color: var(--accent); }
+
+  /* Sections */
+  section { margin: 1.8rem 0; scroll-margin-top: 4.5rem; }
+  section > h2 { font-size: 1.35rem; }
+  section > p.sec-intro { color: var(--muted); font-size: .9rem; margin: .25rem 0 .9rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: .9rem; }
+
+  /* Cards */
+  .card {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 14px; padding: 1rem 1rem .8rem;
+    display: flex; flex-direction: column; gap: .55rem;
+    transition: border-color .12s ease, transform .12s ease;
+  }
+  .card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .card-top { display: flex; gap: .7rem; text-decoration: none; color: inherit; align-items: flex-start; }
+  .card-top .emoji { font-size: 1.9rem; line-height: 1.2; }
+  .card-top h3 { font-size: 1.08rem; }
+  .card-top p { font-size: .84rem; color: var(--muted); margin-top: .15rem; }
+  .badges { display: flex; flex-wrap: wrap; gap: .35rem; }
+  .badges span {
+    font-size: .72rem; background: #0e101a; border: 1px solid var(--border);
+    border-radius: 999px; padding: .16rem .55rem; color: var(--muted); white-space: nowrap;
+  }
+  .badges .fmt-teams { color: #ff9f9f; }
+  .badges .fmt-solo { color: #ffd98a; }
+  .badges .fmt-coop { color: #8ce99a; }
+  details {
+    border-top: 1px solid var(--border); padding-top: .5rem; font-size: .85rem;
+  }
+  summary {
+    cursor: pointer; color: var(--accent); font-size: .82rem;
+    list-style: none; user-select: none;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: " ▾"; }
+  details[open] summary::after { content: " ▴"; }
+  details p { margin-top: .5rem; line-height: 1.45; color: var(--text); }
+  details p.pick { font-style: italic; color: var(--muted); }
+  .hidden { display: none !important; }
+  footer { text-align: center; color: var(--muted); font-size: .85rem; margin-top: 3rem; }
 </style>
 </head>
 <body>
+<div class="wrap">
+
+<header>
   <h1>🎉 Office <span>Games</span></h1>
-  <p class="sub">Monthly social hour — bring your A-game.</p>
-  <div class="games">
-    <a class="game-card" href="pictionary/">
-      <div class="emoji">🎨</div>
-      <h2>Pictionary</h2>
-      <p>Red vs Blue. Draw, guess, argue about whether that's a horse or a dog.</p>
-    </a>
-    <a class="game-card" href="telephone/">
-      <div class="emoji">📞</div>
-      <h2>Drawing Telephone</h2>
-      <p>Write → draw → describe → draw. Watch your sentence mutate into nonsense.</p>
-    </a>
-    <a class="game-card" href="quiz/">
-      <div class="emoji">🧠</div>
-      <h2>Quiz Buzzer</h2>
-      <p>Host asks, teams race to buzz. Answer out loud, argue about the adjudication.</p>
-    </a>
-    <a class="game-card" href="codenames/">
-      <div class="emoji">🕵️</div>
-      <h2>Codenames</h2>
-      <p>One-word clues, 25 words, one assassin. Don't click the assassin.</p>
-    </a>
-    <a class="game-card" href="fibbage/">
-      <div class="emoji">🤥</div>
-      <h2>Fibbage</h2>
-      <p>Weird true facts. Write a convincing lie, then try to spot the truth.</p>
-    </a>
-    <a class="game-card" href="emoji/">
-      <div class="emoji">🎬</div>
-      <h2>Emoji Guesser</h2>
-      <p>Translate movies, songs and sayings into emoji. Teams race to decode.</p>
-    </a>
-    <a class="game-card" href="wordle/">
-      <div class="emoji">🟩</div>
-      <h2>Wordle Race</h2>
-      <p>Same word, two teams, six guesses. You see their colors, not their letters.</p>
-    </a>
-    <a class="game-card" href="polyglot/">
-      <div class="emoji">🌍</div>
-      <h2>Polyglot</h2>
-      <p>Perro, chien, hund — match the words that mean the same thing, fastest team wins.</p>
-    </a>
-    <a class="game-card" href="frogger/">
-      <div class="emoji">🐸</div>
-      <h2>Frogger Rush</h2>
-      <p>Everyone hops at once. Cross the road, dodge the traffic, shame the drowned.</p>
-    </a>
-    <a class="game-card" href="lyrics/">
-      <div class="emoji">🎤</div>
-      <h2>Finish the Line</h2>
-      <p>"Bohemian ___" — fill in the missing word before the other team does.</p>
-    </a>
-    <a class="game-card" href="herd/">
-      <div class="emoji">🐑</div>
-      <h2>Herd Mentality</h2>
-      <p>Answer like everyone else will. Unique thinkers win the Pink Cow of shame.</p>
-    </a>
-    <a class="game-card" href="spyfall/">
-      <div class="emoji">🕵️‍♂️</div>
-      <h2>Spyfall</h2>
-      <p>Everyone knows the location except the spy. Interrogate accordingly.</p>
-    </a>
-    <a class="game-card" href="connections/">
-      <div class="emoji">🔗</div>
-      <h2>Connections</h2>
-      <p>16 words, 4 hidden groups, 4 strikes. Beware the red herrings.</p>
-    </a>
-    <a class="game-card" href="twotruths/">
-      <div class="emoji">😏</div>
-      <h2>Two Truths and a Lie</h2>
-      <p>Learn alarming things about your colleagues. Spot the fabrication.</p>
-    </a>
-    <a class="game-card" href="letters/">
-      <div class="emoji">🔤</div>
-      <h2>Letters Round</h2>
-      <p>Nine letters, one word, no second chances. Countdown rules.</p>
-    </a>
-    <a class="game-card" href="numbers/">
-      <div class="emoji">🔢</div>
-      <h2>Numbers Round</h2>
-      <p>Six numbers, one target. Maths under pressure, Countdown style.</p>
-    </a>
-    <a class="game-card" href="wagers/">
-      <div class="emoji">🎲</div>
-      <h2>Wits &amp; Wagers</h2>
-      <p>Estimate the unknowable, then bet on whoever looked most confident.</p>
-    </a>
-    <a class="game-card" href="typing/">
-      <div class="emoji">🏁</div>
-      <h2>Typing Grand Prix</h2>
-      <p>Same paragraph, live race lanes. Typos cost you everything.</p>
-    </a>
-    <a class="game-card" href="flagzoom/">
-      <div class="emoji">🚩</div>
-      <h2>Flag Zoom</h2>
-      <p>A very blurry flag slowly sharpens. Buzz early, score big.</p>
-    </a>
-    <a class="game-card" href="minesweeper/">
-      <div class="emoji">💣</div>
-      <h2>Minesweeper Duel</h2>
-      <p>One shared minefield, alternating turns. Greed is punished loudly.</p>
-    </a>
-    <a class="game-card" href="memory/">
-      <div class="emoji">🧠</div>
-      <h2>Memory Duel</h2>
-      <p>Shared pairs board. Watch their turn carefully — their flips are your intel.</p>
-    </a>
-    <a class="game-card" href="higherlower/">
-      <div class="emoji">📈</div>
-      <h2>Higher or Lower</h2>
-      <p>Which is bigger? Which came first? Grow the streak, bank or bust.</p>
-    </a>
-    <a class="game-card" href="masterpiece/">
-      <div class="emoji">🏅</div>
-      <h2>Masterpiece</h2>
-      <p>Everyone draws the same prompt. The anonymous gallery decides who's Picasso.</p>
-    </a>
-    <a class="game-card" href="reaction/">
-      <div class="emoji">⚡</div>
-      <h2>Reaction Duel</h2>
-      <p>Wait for green. Click fast. False starts are broadcast to everyone.</p>
-    </a>
-    <a class="game-card" href="snakepit/">
-      <div class="emoji">🐍</div>
-      <h2>Snake Pit</h2>
-      <p>Everyone's snake, one arena, one apple. First to it gets fed.</p>
-    </a>
-    <a class="game-card" href="quickmaths/">
-      <div class="emoji">🧮</div>
-      <h2>Quick Maths</h2>
-      <p>First correct answer takes it. Wrong answers lock you out. No calculators, obviously.</p>
-    </a>
-    <a class="game-card" href="wordladder/">
-      <div class="emoji">🪜</div>
-      <h2>Word Ladder Race</h2>
-      <p>COLD → WARM, one letter at a time. First team up the ladder wins.</p>
-    </a>
-    <a class="game-card" href="scattergories/">
-      <div class="emoji">🔡</div>
-      <h2>Scattergories</h2>
-      <p>One letter, eight categories. Duplicate answers cancel. Then the arguing starts.</p>
-    </a>
-    <a class="game-card" href="simon/">
-      <div class="emoji">🎹</div>
-      <h2>Simon League</h2>
-      <p>The growing sequence, everyone at once. Last memory standing wins it.</p>
-    </a>
-    <a class="game-card" href="hangman/">
-      <div class="emoji">🔤</div>
-      <h2>Hangman Duel</h2>
-      <p>Same phrase, two gallows. Wrong guesses build yours.</p>
-    </a>
-    <a class="game-card" href="whodrewit/">
-      <div class="emoji">🖼️</div>
-      <h2>Who Drew It?</h2>
-      <p>Match every drawing to its artist. Vote the best — and the worst.</p>
-    </a>
-    <a class="game-card" href="memorysketch/">
-      <div class="emoji">✏️</div>
-      <h2>Memory Sketch</h2>
-      <p>Draw the flag of Canada from memory. No googling. We believe in you.</p>
-    </a>
-    <a class="game-card" href="monsterfactory/">
-      <div class="emoji">🧟‍♀️</div>
-      <h2>Monster Factory</h2>
-      <p>You draw a head, strangers add the rest. Vote for the finest abomination.</p>
-    </a>
-    <a class="game-card" href="oneline/">
-      <div class="emoji">➰</div>
-      <h2>One Line Wonder</h2>
-      <p>Pictionary with exactly one stroke. Pen up, game over.</p>
-    </a>
-    <a class="game-card" href="blindcanvas/">
-      <div class="emoji">🙈</div>
-      <h2>Blind Canvas</h2>
-      <p>Draw with invisible ink — first sight of your own art is the public reveal.</p>
-    </a>
+  <p class="tagline">Monthly social hour — bring your A-game. 39 games, zero installs.</p>
+  <p class="intro">
+    <strong>How it works:</strong> open any game, enter your name, hit <em>Create room</em>,
+    and share the 4-letter code (or invite link) in the call chat. Everyone joins from their
+    browser — no accounts, no downloads. The room creator is the host and starts the game.
+    Setup &amp; troubleshooting: <a href="README.md">README</a>.
+  </p>
+</header>
+
+<div class="decide">
+  <h2>🤷 Can't decide?</h2>
+  <div class="decide-grid">
+    <div class="decide-tile"><strong>First social hour</strong>
+      <a href="pictionary/">Pictionary</a> · <a href="herd/">Herd Mentality</a><br>
+      <span class="why">Everyone knows the rules in ten seconds.</span></div>
+    <div class="decide-tile"><strong>Big group (8+)</strong>
+      <a href="fibbage/">Fibbage</a> · <a href="scavenger/">Scavenger Dash</a> · <a href="herd/">Herd Mentality</a><br>
+      <span class="why">Scale beautifully — more people, more chaos.</span></div>
+    <div class="decide-tile"><strong>Puzzle people</strong>
+      <a href="vault/">The Vault</a> · <a href="connections/">Connections</a> · <a href="wordle/">Wordle Race</a><br>
+      <span class="why">Proper thinking, light time pressure.</span></div>
+    <div class="decide-tile"><strong>Maximum chaos</strong>
+      <a href="frogger/">Frogger Rush</a> · <a href="typing/">Typing Grand Prix</a> · <a href="scavenger/">Scavenger Dash</a><br>
+      <span class="why">Loud, fast, and somebody will knock over a chair.</span></div>
+    <div class="decide-tile"><strong>Quiet thinkers</strong>
+      <a href="codenames/">Codenames</a> · <a href="wavelength/">Wavelength</a> · <a href="minesweeper/">Minesweeper Duel</a><br>
+      <span class="why">Low noise, high cunning, no typing races.</span></div>
+    <div class="decide-tile"><strong>New teammate joining</strong>
+      <a href="twotruths/">Two Truths and a Lie</a> · <a href="mindreaders/">Mind Readers</a><br>
+      <span class="why">Icebreakers — learn alarming things about each other.</span></div>
   </div>
+</div>
+
+<div class="filters" id="filters">
+  <button class="chip active" data-f="all">All</button>
+  <button class="chip" data-f="teams">🔴🔵 Teams</button>
+  <button class="chip" data-f="solo">🙋 Solo scores</button>
+  <button class="chip" data-f="coop">🤝 Co-op</button>
+  <span class="sep">|</span>
+  <a class="jump" href="#drawing">🎨 Drawing</a>
+  <a class="jump" href="#words">🔤 Words</a>
+  <a class="jump" href="#trivia">🧠 Trivia</a>
+  <a class="jump" href="#arcade">🕹️ Arcade</a>
+  <a class="jump" href="#social">🎭 Social</a>
+  <a class="jump" href="#coop">🔐 Co-op</a>
+</div>
+
+<!-- ───────────────────────── Drawing & Art ───────────────────────── -->
+<section id="drawing">
+  <h2>🎨 Drawing &amp; Art</h2>
+  <p class="sec-intro">Canvas games. Artistic ability optional — confidence mandatory.</p>
+  <div class="grid">
+
+  <div class="card" data-format="teams">
+    <a class="card-top" href="pictionary/"><span class="emoji">🎨</span>
+      <span><h3>Pictionary</h3><p>Red vs Blue. Draw, guess, argue about whether that's a horse or a dog.</p></span></a>
+    <div class="badges"><span>👥 2+</span><span class="fmt-teams">🔴🔵 Teams</span><span>⏱ ~20 min</span></div>
+    <details><summary>How to play</summary>
+      <p>Drawers rotate, alternating between teams. The drawer picks one of three words (easy / medium / hard) and draws it live; everyone else races to guess in the chat. A correct guess earns your team 20 points plus one per second remaining, so speed matters. Once you've guessed, your chat is hidden from those still guessing — gloat safely. House rule: no letters or numbers on the canvas.</p>
+      <p class="pick">Pick this when: it's the first game of the night and you want guaranteed laughs.</p></details>
+  </div>
+
+  <div class="card" data-format="coop">
+    <a class="card-top" href="telephone/"><span class="emoji">📞</span>
+      <span><h3>Drawing Telephone</h3><p>Write → draw → describe → draw. Watch your sentence mutate into nonsense.</p></span></a>
+    <div class="badges"><span>👥 2+ (4+ is best)</span><span class="fmt-coop">🤝 No scores</span><span>⏱ ~20 min</span></div>
+    <details><summary>How to play</summary>
+      <p>Everyone writes a weird sentence. You then receive someone else's sentence and must draw it. The next person sees only your drawing and must describe it in words — and so on, alternating, until each chain has passed through everyone. The host then walks the whole call through each chain one step at a time, on every screen simultaneously. There are no points; the reveal is the prize.</p>
+      <p class="pick">Pick this when: you want the single funniest ten minutes available on this site.</p></details>
+  </div>
+
+  <div class="card" data-format="solo">
+    <a class="card-top" href="masterpiece/"><span class="emoji">🏅</span>
+      <span><h3>Masterpiece</h3><p>Everyone draws the same prompt. The anonymous gallery decides who's Picasso.</p></span></a>
+    <div class="badges"><span>👥 3+</span><span class="fmt-solo">🙋 Solo scores</span><span>⏱ ~15 min</span></div>
+    <details><summary>How to play</summary>
+      <p>Everyone gets the same prompt ("a dragon's first day as a barista") and draws it on their own canvas against the clock. The drawings then hang anonymously in a gilt-framed gallery and everyone votes for their favourite — you can't vote for your own. Each vote is worth 10 points to the artist, and the round winner gets the crown. Highest total after 3–5 rounds is the Grand Master.</p>
+      <p class="pick">Pick this when: the group secretly believes they're artists and needs correcting.</p></details>
+  </div>
+
+  <div class="card" data-format="solo">
+    <a class="card-top" href="whodrewit/"><span class="emoji">🖼️</span>
+      <span><h3>Who Drew It?</h3><p>Match every drawing to its artist. Vote the best — and the worst.</p></span></a>
+    <div class="badges"><span>👥 3+</span><span class="fmt-solo">🙋 Solo scores</span><span>⏱ ~20 min</span></div>
+    <details><summary>How to play</summary>
+      <p>Everyone draws the same prompt, then the drawings return anonymously. Your job: assign every drawing to the colleague you think drew it (each name used exactly once — 5 points per correct link), and crown one 🏆 best (+10 to its artist) and one 💩 worst (−5 to its artist). Knowing your colleagues' artistic tells is the real skill. A boobie prize awaits whoever is voted worst most consistently.</p>
+      <p class="pick">Pick this when: your team has played Pictionary enough to recognise each other's "style".</p></details>
+  </div>
+
+  <div class="card" data-format="solo">
+    <a class="card-top" href="memorysketch/"><span class="emoji">✏️</span>
+      <span><h3>Memory Sketch</h3><p>Draw the flag of Canada from memory. No googling. We believe in you.</p></span></a>
+    <div class="badges"><span>👥 3+</span><span class="fmt-solo">🙋 Solo scores</span><span>⏱ ~20 min</span></div>
+    <details><summary>How to play</summary>
+      <p>Each round names something famous — a flag, a currency symbol, the Bluetooth logo, the outline of Italy, the Eiffel Tower — and everyone draws it purely from memory (no peeking, the camera is watching). The anonymous gallery then votes for the most accurate (+10 per vote) and the funniest (+5 per vote), with the real thing displayed alongside for maximum pain where one can be rendered. Crowns for the most accurate artist and the people's clown.</p>
+      <p class="pick">Pick this when: you want to discover nobody knows which way the € faces.</p></details>
+  </div>
+
+  <div class="card" data-format="solo">
+    <a class="card-top" href="monsterfactory/"><span class="emoji">🧟‍♀️</span>
+      <span><h3>Monster Factory</h3><p>You draw a head, strangers add the rest. Vote for the finest abomination.</p></span></a>
+    <div class="badges"><span>👥 3+</span><span class="fmt-solo">🙋 Solo scores</span><span>⏱ ~15 min</span></div>
+    <details><summary>How to play</summary>
+      <p>The fold-over paper game: everyone draws a head, then canvases rotate and you continue someone else's monster from just a 30-pixel sliver of their neck lines — torso, then legs, three artists per monster. The finished creatures assemble part-by-part in a synchronized reveal. Everyone then votes for their favourite: every vote gives +5 to all three of its contributors, and the winning trio gets +10 each.</p>
+      <p class="pick">Pick this when: you want collaborative chaos instead of competition.</p></details>
+  </div>
+
+  <div class="card" data-format="solo">
+    <a class="card-top" href="oneline/"><span class="emoji">➰</span>
+      <span><h3>One Line Wonder</h3><p>Pictionary with exactly one stroke. Pen up, game over.</p></span></a>
+    <div class="badges"><span>👥 2+</span><span class="fmt-solo">🙋 Solo scores</span><span>⏱ ~20 min</span></div>
+    <details><summary>How to play</summary>
+      <p>Pictionary's rules with one brutal constraint: the drawer gets a single continuous stroke. The moment the pen lifts — even accidentally — the canvas locks forever. Guessers race in chat: a correct guess earns you 15 points plus seconds remaining, and the drawer collects +5 per person who got it (capped at 25). Individual scores, with a ✒️ Smoothest Operator crown for the drawer who charmed the most guessers.</p>
+      <p class="pick">Pick this when: regular Pictionary has become too easy for your resident artist.</p></details>
+  </div>
+
+  <div class="card" data-format="solo">
+    <a class="card-top" href="blindcanvas/"><span class="emoji">🙈</span>
+      <span><h3>Blind Canvas</h3><p>Draw with invisible ink — first sight of your own art is the public reveal.</p></span></a>
+    <div class="badges"><span>👥 3+</span><span class="fmt-solo">🙋 Solo scores</span><span>⏱ ~15 min</span></div>
+    <details><summary>How to play</summary>
+      <p>Everyone draws the same prompt, but the ink is invisible — you see only a cursor dot and an "ink flowing" indicator, never your strokes. No undo, no clear (what would you undo?). The drawings are then revealed one at a time to the whole call, with the artist's name landing three seconds after the picture for comedy timing. Votes for most recognizable (+10 each) and funniest (+5 each) decide the leaderboard.</p>
+      <p class="pick">Pick this when: you want the biggest laugh-per-effort ratio in the drawing section.</p></details>
+  </div>
+
+  </div>
+</section>
+
+<!-- ───────────────────────── Words & Letters ───────────────────────── -->
+<section id="words">
+  <h2>🔤 Words &amp; Letters</h2>
+  <p class="sec-intro">For the people who do the crossword at lunch.</p>
+  <div class="grid">
+
+  <div class="card" data-format="teams">
+    <a class="card-top" href="wordle/"><span class="emoji">🟩</span>
+      <span><h3>Wordle Race</h3><p>Same word, two teams, six guesses. You see their colors, not their letters.</p></span></a>
+    <div class="badges"><span>👥 2+</span><span class="fmt-teams">🔴🔵 Teams</span><span>⏱ ~15 min</span></div>
+    <details><summary>How to play</summary>
+      <p>Both teams race to solve the same hidden five-letter word with six guesses each. Your team's board shows letters and colors; the opponent's shows only their tile colors — their progress, not their information. Teammates alternate guesses (you can't submit twice in a row unless you're alone), and guesses must be real words. First team to solve takes the round; first to the majority of a best-of-3/5/7 wins.</p>
+      <p class="pick">Pick this when: half the office already plays Wordle every morning anyway.</p></details>
+  </div>
+
+  <div class="card" data-format="teams">
+    <a class="card-top" href="letters/"><span class="emoji">🔤</span>
+      <span><h3>Letters Round</h3><p>Nine letters, one word, no second chances. Countdown rules.</p></span></a>
+    <div class="badges"><span>👥 2+</span><span class="fmt-teams">🔴🔵 Teams</span><span>⏱ ~15 min</span></div>
+    <details><summary>How to play</summary>
+      <p>Nine random letters appear and the clock starts. Every player builds the longest word they can from those letters — the rack greys out tiles live as you type, and your submission is one-shot: no edits once you lock in. Each team scores the length of its single best valid word per round (dictionary-checked). Six to twelve rounds; highest team total wins.</p>
+      <p class="pick">Pick this when: you want quiet concentration punctuated by someone yelling "QUAINTER is a word!"</p></details>
+  </div>
+
+  <div class="card" data-format="solo">
+    <a class="card-top" href="scattergories/"><span class="emoji">🔡</span>
+      <span><h3>Scattergories</h3><p>One letter, eight categories. Duplicate answers cancel. Then the arguing starts.</p></span></a>
+    <div class="badges"><span>👥 3+</span><span class="fmt-solo">🙋 Solo scores</span><span>⏱ ~20 min</span></div>
+    <details><summary>How to play</summary>
+      <p>One letter, eight categories ("a pizza topping", "something you shout"), ninety seconds to fill all eight — every answer must start with the letter. Answers that duplicate anyone else's are cancelled for both of you, and dubious answers face a group challenge vote (majority of the others strikes it). Surviving answers score 2 points, with a +1 bonus for alliterative multi-word answers. The challenge arguments are the actual game.</p>
+      <p class="pick">Pick this when: the group enjoys litigating whether "Lasagne" counts as "something in a kitchen".</p></details>
+  </div>
+
+  <div class="card" data-format="teams">
+    <a class="card-top" href="wordladder/"><span class="emoji">🪜</span>
+      <span><h3>Word Ladder Race</h3><p>COLD → WARM, one letter at a time. First team up the ladder wins.</p></span></a>
+    <div class="badges"><span>👥 2+</span><span class="fmt-teams">🔴🔵 Teams</span><span>⏱ ~15 min</span></div>
+    <details><summary>How to play</summary>
+      <p>Both teams see the same start and target words. Build a chain by changing exactly one letter per step — every rung must be a real four-letter word, and any teammate can add the next word (or undo the last). You see the opponent's step count but never their words. First team to reach the target scores 20, plus a 5-point bonus for matching the puzzle's proven shortest path. Stuck? Both teams can concede to see the optimal route.</p>
+      <p class="pick">Pick this when: the puzzle people want something competitive but bite-sized.</p></details>
+  </div>
+
+  <div class="card" data-format="teams">
+    <a class="card-top" href="hangman/"><span class="emoji">🪢</span>
+      <span><h3>Hangman Duel</h3><p>Same phrase, two gallows. Wrong guesses build yours.</p></span></a>
+    <div class="badges"><span>👥 2+</span><span class="fmt-teams">🔴🔵 Teams</span><span>⏱ ~15 min</span></div>
+    <details><summary>How to play</summary>
+      <p>Teams take turns picking letters for the same hidden phrase (category shown). A correct letter scores 2 points per occurrence and your team keeps the turn; a wrong one adds a piece to your team's own six-part gallows and passes play. Six wrongs and your team spectates the rest of the round. Feeling brave? "Solve it" with the full phrase for +15 — but a wrong solve costs a gallows piece. The letter that completes the phrase earns a +10 bonus.</p>
+      <p class="pick">Pick this when: you want a classic everyone already knows, sharpened into a duel.</p></details>
+  </div>
+
+  <div class="card" data-format="teams">
+    <a class="card-top" href="lyrics/"><span class="emoji">🎤</span>
+      <span><h3>Finish the Line</h3><p>"Bohemian ___" — fill in the missing word before the other team does.</p></span></a>
+    <div class="badges"><span>👥 2+</span><span class="fmt-teams">🔴🔵 Teams</span><span>⏱ ~15 min</span></div>
+    <details><summary>How to play</summary>
+      <p>A famous song title appears with one word missing, plus the artist as a hint ("Livin' on a ___ · Bon Jovi"). Everyone types the missing word within 25 seconds; correct answers earn your team 20 points plus seconds remaining at the moment you submitted, so fast fingers win. Minor typos are forgiven. The host can also type custom fill-in-the-blank questions in the lobby — in-jokes and anything-goes rounds welcome.</p>
+      <p class="pick">Pick this when: the office playlist arguments need settling with data.</p></details>
+  </div>
+
+  <div class="card" data-format="teams">
+    <a class="card-top" href="connections/"><span class="emoji">🔗</span>
+      <span><h3>Connections</h3><p>16 words, 4 hidden groups, 4 strikes. Beware the red herrings.</p></span></a>
+    <div class="badges"><span>👥 2+</span><span class="fmt-teams">🔴🔵 Teams</span><span>⏱ ~15 min</span></div>
+    <details><summary>How to play</summary>
+      <p>Both teams race the same NYT-style puzzle on separate boards: sixteen words hiding four groups of four. Select four tiles and any teammate submits — a correct group locks in for 10 points, three-out-of-four gets a taunting "One away!", and every miss is a strike. Four strikes and your team is out while the enemy plays on. First team to find all four groups banks a +20 bonus. You can see the opponent's group count and strikes, never their board.</p>
+      <p class="pick">Pick this when: your sharpest minds need humbling by a well-placed red herring.</p></details>
+  </div>
+
+  <div class="card" data-format="teams">
+    <a class="card-top" href="polyglot/"><span class="emoji">🌍</span>
+      <span><h3>Polyglot</h3><p>Perro, chien, hund — match the words that mean the same thing, fastest team wins.</p></span></a>
+    <div class="badges"><span>👥 2+</span><span class="fmt-teams">🔴🔵 Teams</span><span>⏱ ~15 min</span></div>
+    <details><summary>How to play</summary>
+      <p>Two modes, host's choice. <em>Pair Match:</em> a board of 24 foreign words (language labelled, meaning hidden) hiding six groups that mean the same thing — click two same-meaning words to claim them for your team (+20 a pair); a wrong pair locks your whole team out for 4 seconds and costs 5. <em>Translation Hunt</em> (easier): a target English word is shown and five of its translations hide among fifteen decoys — find them all, majority-taker gets a bonus. Beware cognate bait: <em>chat</em> is French for cat.</p>
+      <p class="pick">Pick this when: the team is international and someone's been smug about their languages.</p></details>
+  </div>
+
+  </div>
+</section>
+
+<!-- ───────────────────────── Trivia & Knowledge ───────────────────────── -->
+<section id="trivia">
+  <h2>🧠 Trivia &amp; Knowledge</h2>
+  <p class="sec-intro">Facts, estimates, and educated bluffing.</p>
+  <div class="grid">
+
+  <div class="card" data-format="teams">
+    <a class="card-top" href="quiz/"><span class="emoji">🧠</span>
+      <span><h3>Quiz Buzzer</h3><p>Host asks, teams race to buzz. Answer out loud, argue about the adjudication.</p></span></a>
+    <div class="badges"><span>👥 3+ (host + 2)</span><span class="fmt-teams">🔴🔵 Teams</span><span>🎙 Host-led</span><span>⏱ ~20 min</span></div>
+    <details><summary>How to play</summary>
+      <p>The room creator is the quizmaster — they see the answers, nobody else does, and they don't play. Each question gets a 3-2-1 countdown (so fast readers can't pre-read), then it's a race to the big BUZZ button (spacebar works). The buzzer answers out loud on the call; the quizmaster rules ✅ Correct (+10) or ❌ Wrong (−5, that player locked out, buzzing reopens). Ships with 72 questions; edit the pack for your own rounds.</p>
+      <p class="pick">Pick this when: someone on the team was born to hold a clipboard and deny points.</p></details>
+  </div>
+
+  <div class="card" data-format="solo">
+    <a class="card-top" href="fibbage/"><span class="emoji">🤥</span>
+      <span><h3>Fibbage</h3><p>Weird true facts. Write a convincing lie, then try to spot the truth.</p></span></a>
+    <div class="badges"><span>👥 3+ (5+ is best)</span><span class="fmt-solo">🙋 Solo scores</span><span>⏱ ~20 min</span></div>
+    <details><summary>How to play</summary>
+      <p>A true-but-absurd fact appears with the key word blanked ("In Switzerland it's illegal to own just one ___"). Everyone secretly writes a plausible fake answer, then all the lies plus the real answer appear shuffled, and everyone votes for the truth. Finding the truth pays 100 points; every colleague who falls for your lie pays you 50. All 49 built-in facts are genuinely true.</p>
+      <p class="pick">Pick this when: the group is big and you want to find out who the natural liars are.</p></details>
+  </div>
+
+  <div class="card" data-format="solo">
+    <a class="card-top" href="wagers/"><span class="emoji">🎲</span>
+      <span><h3>Wits &amp; Wagers</h3><p>Estimate the unknowable, then bet on whoever looked most confident.</p></span></a>
+    <div class="badges"><span>👥 3+</span><span class="fmt-solo">🙋 Solo scores</span><span>⏱ ~20 min</span></div>
+    <details><summary>How to play</summary>
+      <p>A numeric question nobody knows exactly ("In metres, how deep is the deepest point of the ocean?"). Everyone submits an estimate; the estimates line up sorted as cards, and then everyone bets on whichever they trust — your own included. The winner is the closest estimate <em>without going over</em>. The winning estimate's author scores 10, everyone who bet on it scores 10, and betting on your own winning answer stacks to 20.</p>
+      <p class="pick">Pick this when: nobody wants pure trivia but everyone has opinions about numbers.</p></details>
+  </div>
+
+  <div class="card" data-format="teams">
+    <a class="card-top" href="higherlower/"><span class="emoji">📈</span>
+      <span><h3>Higher or Lower</h3><p>Which is bigger? Which came first? Grow the streak, bank or bust.</p></span></a>
+    <div class="badges"><span>👥 2+</span><span class="fmt-teams">🔴🔵 Teams</span><span>⏱ ~15 min</span></div>
+    <details><summary>How to play</summary>
+      <p>Teams alternate turns answering comparisons: which country is larger, which event came first, which landmark is taller. Each correct answer grows your streak — then you choose: 🏦 bank it (streak becomes points, turn passes) or push on for more with the whole streak at risk. One wrong answer loses everything unbanked. Comparisons are generated with wide margins, so answers are never coin-flips. First team to the target score wins.</p>
+      <p class="pick">Pick this when: you want maximum tension per brain cell — the bank-or-push arguments are the game.</p></details>
+  </div>
+
+  <div class="card" data-format="teams">
+    <a class="card-top" href="flagzoom/"><span class="emoji">🚩</span>
+      <span><h3>Flag Zoom</h3><p>A very blurry flag slowly sharpens. Buzz early, score big.</p></span></a>
+    <div class="badges"><span>👥 2+</span><span class="fmt-teams">🔴🔵 Teams</span><span>⏱ ~15 min</span></div>
+    <details><summary>How to play</summary>
+      <p>A flag appears hidden behind heavy pixelation that eases off over 25 seconds. Everyone guesses in open chat; the first correct guess ends the round and earns that team 10 points plus one per second remaining — guess early on a hunch or wait for certainty. Common aliases count ("Holland", "UK"), and the near-identical twins are cross-honoured: guessing Chad on Romania still scores. 64 flags, drawn on canvas so they look identical on every computer.</p>
+      <p class="pick">Pick this when: someone claims to be "good at geography" and must be tested.</p></details>
+  </div>
+
+  <div class="card" data-format="teams">
+    <a class="card-top" href="quickmaths/"><span class="emoji">🧮</span>
+      <span><h3>Quick Maths</h3><p>First correct answer takes it. Wrong answers lock you out. No calculators, obviously.</p></span></a>
+    <div class="badges"><span>👥 2+</span><span class="fmt-teams">🔴🔵 Teams</span><span>⏱ ~15 min</span></div>
+    <details><summary>How to play</summary>
+      <p>Mental arithmetic appears huge on screen — starting friendly (34 + 17) and ramping up to brackets and divisions. Everyone types at once; the first correct answer wins 10 points for their team and ends the question. A wrong answer shakes and locks <em>you</em> out for three seconds, so spraying guesses backfires. Hot streaks get broadcast. Tied at the end? Sudden-death questions until one team blinks.</p>
+      <p class="pick">Pick this when: you need a fast filler game and want to expose who still has times tables.</p></details>
+  </div>
+
+  <div class="card" data-format="teams">
+    <a class="card-top" href="numbers/"><span class="emoji">🔢</span>
+      <span><h3>Numbers Round</h3><p>Six numbers, one target. Maths under pressure, Countdown style.</p></span></a>
+    <div class="badges"><span>👥 2+</span><span class="fmt-teams">🔴🔵 Teams</span><span>⏱ ~20 min</span></div>
+    <details><summary>How to play</summary>
+      <p>Six number tiles (a mix of large — 25, 50, 75, 100 — and small) and a random three-digit target. Build an arithmetic expression that gets as close as you can, using each tile at most once. The validator enforces classic Countdown rules: divisions must be exact, no negative intermediate results, and it shows your running value live as you type. Each team's closest answer scores: exact 10, within five 7, within ten 5.</p>
+      <p class="pick">Pick this when: the spreadsheet people need a stage.</p></details>
+  </div>
+
+  </div>
+</section>
+
+<!-- ───────────────────────── Arcade & Reflexes ───────────────────────── -->
+<section id="arcade">
+  <h2>🕹️ Arcade &amp; Reflexes</h2>
+  <p class="sec-intro">Fast hands, live action — and network lag can never kill you (collisions are computed on your own machine).</p>
+  <div class="grid">
+
+  <div class="card" data-format="teams">
+    <a class="card-top" href="frogger/"><span class="emoji">🐸</span>
+      <span><h3>Frogger Rush</h3><p>Everyone hops at once. Cross the road, dodge the traffic, shame the drowned.</p></span></a>
+    <div class="badges"><span>👥 2+</span><span class="fmt-teams">🔴🔵 Teams</span><span>⏱ ~10 min</span></div>
+    <details><summary>How to play</summary>
+      <p>Everyone's frog plays simultaneously on the same board — five lanes of traffic, a river of logs, one goal. Arrows, WASD, or the touch d-pad to hop. Every crossing banks +10 for your team and respawns you at the start; deaths are free but counted, publicly. You see everyone else's frogs as ghosts with name tags. The traffic is identical on every screen and collisions are judged locally, so lag genuinely cannot kill you. Lanes speed up each round.</p>
+      <p class="pick">Pick this when: you need five minutes of pure yelling.</p></details>
+  </div>
+
+  <div class="card" data-format="teams">
+    <a class="card-top" href="snakepit/"><span class="emoji">🐍</span>
+      <span><h3>Snake Pit</h3><p>Everyone's snake, one arena, one apple. First to it gets fed.</p></span></a>
+    <div class="badges"><span>👥 2+</span><span class="fmt-teams">🔴🔵 Teams</span><span>⏱ ~10 min</span></div>
+    <details><summary>How to play</summary>
+      <p>Every player's snake slithers in the same arena at once, racing for a single shared apple — first snake there eats it (+10 team, you grow), and the next apple appears for everyone. Other snakes are ghosts: you can't crash into them, only into walls and your own ever-longer body. Die and you respawn small after a moment, deaths tallied for the end-of-round roast. Longest snake gets a crown.</p>
+      <p class="pick">Pick this when: Frogger went down well and the crowd wants a sequel.</p></details>
+  </div>
+
+  <div class="card" data-format="teams">
+    <a class="card-top" href="typing/"><span class="emoji">🏁</span>
+      <span><h3>Typing Grand Prix</h3><p>Same paragraph, live race lanes. Typos cost you everything.</p></span></a>
+    <div class="badges"><span>👥 2+</span><span class="fmt-teams">🔴🔵 Teams</span><span>⏱ ~15 min</span></div>
+    <details><summary>How to play</summary>
+      <p>Everyone types the same short passage (original stories about llamas filing invoices — no famous quotes). A wrong keystroke blocks you until you fix it, so accuracy is speed. Everyone's progress races across the screen as team-colored cars in live lanes. Finishing first of N earns N points for your team, down to 1; non-finishers score by distance covered. Pasting is blocked, nice try. A 🏎️ crown goes to the fastest average WPM.</p>
+      <p class="pick">Pick this when: the keyboard warriors need a legitimate outlet.</p></details>
+  </div>
+
+  <div class="card" data-format="teams">
+    <a class="card-top" href="reaction/"><span class="emoji">⚡</span>
+      <span><h3>Reaction Duel</h3><p>Wait for green. Click fast. False starts are broadcast to everyone.</p></span></a>
+    <div class="badges"><span>👥 2+</span><span class="fmt-teams">🔴🔵 Teams</span><span>⏱ ~10 min</span></div>
+    <details><summary>How to play</summary>
+      <p>The screen turns red: WAIT. After a random 2–6 seconds it flashes green: CLICK (or smash the spacebar). Your reaction is measured on your own machine, so lag can't help or hurt anyone. Clicking early is a false start — you're out for the round and everyone is told it was you. Beware: some rounds flash a yellow fake-out first. Fastest of N players earns N team points down to 1; the fastest average wins the ⚡ crown.</p>
+      <p class="pick">Pick this when: you have three minutes to fill and a grudge to settle.</p></details>
+  </div>
+
+  <div class="card" data-format="teams">
+    <a class="card-top" href="simon/"><span class="emoji">🎹</span>
+      <span><h3>Simon League</h3><p>The growing sequence, everyone at once. Last memory standing wins it.</p></span></a>
+    <div class="badges"><span>👥 2+</span><span class="fmt-teams">🔴🔵 Teams</span><span>⏱ ~15 min</span></div>
+    <details><summary>How to play</summary>
+      <p>Classic Simon — watch the color-and-tone sequence, repeat it, watch it grow — except everyone plays the <em>same</em> sequence simultaneously on their own pad (keys 1–4 work too). One wrong note and you're out at that level, watching the survivors' level bars climb with popcorn. Each player's levels completed add to their team's total; deepest sequence of the night earns the 🧠 crown. Playback speeds up as it grows.</p>
+      <p class="pick">Pick this when: you want slow-building tension you can hear in people's breathing.</p></details>
+  </div>
+
+  <div class="card" data-format="teams">
+    <a class="card-top" href="memory/"><span class="emoji">🎴</span>
+      <span><h3>Memory Duel</h3><p>Shared pairs board. Watch their turn carefully — their flips are your intel.</p></span></a>
+    <div class="badges"><span>👥 2+</span><span class="fmt-teams">🔴🔵 Teams</span><span>⏱ ~15 min</span></div>
+    <details><summary>How to play</summary>
+      <p>One shared Concentration board of face-down emoji pairs. Teams alternate: any teammate flips two cards, everyone watches both flips live. A match locks the pair in your team's color (+10) and you go again; a miss shows both cards for two seconds — which is exactly the intel the other team is memorizing. Round ends when the board is cleared; most pairs wins. Boards from 4×4 up to 8×6 for the brave.</p>
+      <p class="pick">Pick this when: you want a calm game where paying attention is the whole skill.</p></details>
+  </div>
+
+  <div class="card" data-format="teams">
+    <a class="card-top" href="minesweeper/"><span class="emoji">💣</span>
+      <span><h3>Minesweeper Duel</h3><p>One shared minefield, alternating turns. Greed is punished loudly.</p></span></a>
+    <div class="badges"><span>👥 2+</span><span class="fmt-teams">🔴🔵 Teams</span><span>⏱ ~15 min</span></div>
+    <details><summary>How to play</summary>
+      <p>One shared minesweeper board; teams alternate push-your-luck turns. On your turn keep revealing cells — every safe cell is +1 (a zero-cascade is a jackpot) — until you either pass voluntarily or hit a mine: 💥 −10 and the turn passes anyway. Numbers work exactly like classic minesweeper, the first click always cascades, and flags are available for team coordination. Revealed cells are tinted by team, so the finished board tells the story of who got greedy.</p>
+      <p class="pick">Pick this when: the logic lovers and the gamblers need one game they'll both enjoy.</p></details>
+  </div>
+
+  </div>
+</section>
+
+<!-- ───────────────────────── Social & Party ───────────────────────── -->
+<section id="social">
+  <h2>🎭 Social &amp; Party</h2>
+  <p class="sec-intro">Games where the other players are the content. Cameras on.</p>
+  <div class="grid">
+
+  <div class="card" data-format="solo">
+    <a class="card-top" href="herd/"><span class="emoji">🐑</span>
+      <span><h3>Herd Mentality</h3><p>Answer like everyone else will. Unique thinkers win the Pink Cow of shame.</p></span></a>
+    <div class="badges"><span>👥 3+</span><span class="fmt-solo">🙋 Solo scores</span><span>⏱ ~15 min</span></div>
+    <details><summary>How to play</summary>
+      <p>A prompt with no right answer ("name a pizza topping") — everyone answers secretly, trying to match what the <em>majority</em> will say. Everyone in the biggest matching group scores a point; original thinking is punished. And if you're the only lone unique answer while everyone else grouped up, you hold the 🐄 Pink Cow of shame until someone takes it off you. First to 8 points wins.</p>
+      <p class="pick">Pick this when: you need a zero-explanation game that works for literally any group size.</p></details>
+  </div>
+
+  <div class="card" data-format="solo">
+    <a class="card-top" href="spyfall/"><span class="emoji">🕵️‍♂️</span>
+      <span><h3>Spyfall</h3><p>Everyone knows the location except the spy. Interrogate accordingly.</p></span></a>
+    <div class="badges"><span>👥 3+ (5–8 is best)</span><span class="fmt-solo">🙋 Solo scores</span><span>⏱ ~25 min</span></div>
+    <details><summary>How to play</summary>
+      <p>Everyone is secretly dealt the same location and a role — "Beach, you're the Lifeguard" — except one player, the spy, who gets nothing. You interrogate each other out loud: answer too vaguely and you look like the spy; too specifically and you hand the spy the location. Anyone can call one vote per round (it must be unanimous to convict). Catching the spy pays everyone a point; the spy wins double by surviving the clock or by openly guessing the location.</p>
+      <p class="pick">Pick this when: the call is chatty — this one turns conversation itself into the game.</p></details>
+  </div>
+
+  <div class="card" data-format="solo">
+    <a class="card-top" href="twotruths/"><span class="emoji">😏</span>
+      <span><h3>Two Truths and a Lie</h3><p>Learn alarming things about your colleagues. Spot the fabrication.</p></span></a>
+    <div class="badges"><span>👥 3+</span><span class="fmt-solo">🙋 Solo scores</span><span>⏱ ~20 min</span></div>
+    <details><summary>How to play</summary>
+      <p>In the lobby everyone locks in two true statements about themselves and one lie. Each round puts one player in the spotlight: their three statements appear shuffled, and everybody else votes for the lie while the subject sweats on camera. Spotting the lie pays 10; each person the subject fools pays them 5. The reveal pauses so you can demand the story behind the weird truths. A 🏆 Best Liar is crowned at the end.</p>
+      <p class="pick">Pick this when: someone new joined the team — there is no better icebreaker.</p></details>
+  </div>
+
+  <div class="card" data-format="teams">
+    <a class="card-top" href="codenames/"><span class="emoji">🕵️</span>
+      <span><h3>Codenames</h3><p>One-word clues, 25 words, one assassin. Don't click the assassin.</p></span></a>
+    <div class="badges"><span>👥 4+</span><span class="fmt-teams">🔴🔵 Teams</span><span>⏱ ~20 min</span></div>
+    <details><summary>How to play</summary>
+      <p>A 5×5 grid of words. Each team claims a spymaster who secretly sees which words belong to whom; spymasters give one-word spoken clues ("fruit, two!") and their teammates click to reveal guesses. Your own word: keep guessing. A neutral or enemy word: turn over. The assassin: you lose, instantly. First team to reveal all its words wins. No timer — the agonized silences are a feature.</p>
+      <p class="pick">Pick this when: you have 20+ minutes and a group that likes thinking out loud.</p></details>
+  </div>
+
+  <div class="card" data-format="teams">
+    <a class="card-top" href="emoji/"><span class="emoji">🎬</span>
+      <span><h3>Emoji Guesser</h3><p>Translate movies, songs and sayings into emoji. Teams race to decode.</p></span></a>
+    <div class="badges"><span>👥 2+</span><span class="fmt-teams">🔴🔵 Teams</span><span>⏱ ~20 min</span></div>
+    <details><summary>How to play</summary>
+      <p>Pictionary's rules, emoji instead of ink. The builder picks a movie, song, or saying and composes a clue from a 336-emoji palette — the string grows live and huge on everyone's screen (🦁👑 …). Everyone else races to guess in chat for 20 points plus seconds remaining for their team. Letters are banned; the category and word blanks are shown. Builders rotate between teams.</p>
+      <p class="pick">Pick this when: half the team "can't draw" but texts exclusively in emoji anyway.</p></details>
+  </div>
+
+  <div class="card" data-format="solo">
+    <a class="card-top" href="mindreaders/"><span class="emoji">🔮</span>
+      <span><h3>Mind Readers</h3><p>Coffee or tea? Predict your colleague's answer. Vote who's most likely to.</p></span></a>
+    <div class="badges"><span>👥 3+</span><span class="fmt-solo">🙋 Solo scores</span><span>⏱ ~15 min</span></div>
+    <details><summary>How to play</summary>
+      <p>Two alternating round types. <em>This-or-that:</em> one spotlight player secretly answers an either/or ("window seat or aisle?") while everyone else predicts their pick — correct predictions pay 10, and the spotlight earns 3 for every person they surprised. <em>Most likely to:</em> everyone votes which player is most likely to, say, befriend a seagull; voting with the majority pays 10, and the chosen one wears the ⭐ badge. All prompts are wholesome or silly — it's a love letter, not a roast.</p>
+      <p class="pick">Pick this when: you want to find out who actually pays attention to their teammates.</p></details>
+  </div>
+
+  <div class="card" data-format="solo">
+    <a class="card-top" href="scavenger/"><span class="emoji">🏃</span>
+      <span><h3>Scavenger Dash</h3><p>"Fetch something yellow — GO." The game is your house; the app is the timer.</p></span></a>
+    <div class="badges"><span>👥 3+</span><span class="fmt-solo">🙋 Solo scores</span><span>⏱ ~20 min</span></div>
+    <details><summary>How to play</summary>
+      <p>A klaxon, a prompt — "fetch the most useless kitchen gadget" — and everyone physically sprints off camera. Smash GOT IT when you're back: first returner scores 10, then 7, 5, and 3 for everyone else who makes it. Then the show-and-tell: hold your haul up to the camera and vote for the best item (+8). The camera is the referee. Expect heavy breathing and at least one collision with furniture.</p>
+      <p class="pick">Pick this when: everyone's been sitting in meetings all day and needs to move.</p></details>
+  </div>
+
+  <div class="card" data-format="teams">
+    <a class="card-top" href="wavelength/"><span class="emoji">🌡️</span>
+      <span><h3>Wavelength</h3><p>"Cold pizza" — now find where that sits between A Snack and A Meal.</p></span></a>
+    <div class="badges"><span>👥 2+ (2 per team is best)</span><span class="fmt-teams">🔴🔵 Teams</span><span>⏱ ~20 min</span></div>
+    <details><summary>How to play</summary>
+      <p>The psychic sees a spectrum ("a snack ↔ a meal") with a hidden target zone on a dial, and gives one spoken clue that points at it — "cold pizza". Their team argues out loud while dragging a shared needle to where they think the target sits, then locks it in. Closer bands score 4, 3, or 2 points; before the reveal, the other team can steal a point by calling which side of the needle the true target lies. First team to 10 wins. Psychics rotate.</p>
+      <p class="pick">Pick this when: you want the best pure conversation game ever designed for a call.</p></details>
+  </div>
+
+  </div>
+</section>
+
+<!-- ───────────────────────── Co-op ───────────────────────── -->
+<section id="coop">
+  <h2>🔐 Co-op</h2>
+  <p class="sec-intro">Everyone on the same side, against the clock.</p>
+  <div class="grid">
+
+  <div class="card" data-format="coop">
+    <a class="card-top" href="vault/"><span class="emoji">🔐</span>
+      <span><h3>The Vault</h3><p>Six locks, one clock, every brain on the call. Crack it together or lose together.</p></span></a>
+    <div class="badges"><span>👥 2+</span><span class="fmt-coop">🤝 Co-op</span><span>⏱ ~25 min</span></div>
+    <details><summary>How to play</summary>
+      <p>The whole room versus one vault: six sequential locks — ciphers, logic deductions, riddles, number sequences, hidden words, and a final combination — against a 15/20/25-minute clock. Everyone sees the same puzzle; discussion happens out loud and anyone can type an answer attempt into the shared box. Wrong attempts burn 15 seconds, so think before you type; two hints per lock are available at 60 seconds each. Beat all six and the vault swings open with your remaining time as the score — the room's best time is remembered.</p>
+      <p class="pick">Pick this when: the team likes puzzles and you'd rather bond than compete.</p></details>
+  </div>
+
+  </div>
+</section>
+
+<footer>
+  Made for the monthly social · everything is honor-system (dev-tools cheaters answer to HR) ·
+  add your own words, questions and in-jokes — see the <a href="README.md" style="color:var(--accent)">README</a>
+</footer>
+
+</div>
+
+<script>
+  const chips = document.querySelectorAll(".chip");
+  const cards = document.querySelectorAll(".card");
+  const sections = document.querySelectorAll("section");
+  chips.forEach((chip) => chip.addEventListener("click", () => {
+    chips.forEach((c) => c.classList.toggle("active", c === chip));
+    const f = chip.dataset.f;
+    cards.forEach((card) => {
+      card.classList.toggle("hidden", f !== "all" && card.dataset.format !== f);
+    });
+    sections.forEach((sec) => {
+      const any = sec.querySelector(".card:not(.hidden)");
+      sec.classList.toggle("hidden", !any);
+    });
+  }));
+</script>
 </body>
 </html>

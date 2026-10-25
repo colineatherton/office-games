@@ -118,6 +118,24 @@ synced through the same Firebase Realtime Database. Checked = built.
   your own drawing until you submit). One-at-a-time comedy reveal, then votes
   for most recognizable and funniest.
 
+## Wave five — three more, 2026-10-22
+
+- [x] **🌡️ Wavelength** — the psychic sees a hidden target on a spectrum
+  ("a snack ↔ a meal") and gives one spoken clue; their team drags a shared
+  dial to the guess. Points by closeness; the other team can steal a point by
+  calling which side the guess missed on.
+- [x] **🔐 The Vault** — the first co-op game: everyone vs a 20-minute clock,
+  six sequential locks (cipher, logic, riddle, pattern, acrostic, combination).
+  Wrong guesses cost 15s, hints cost 60s. Beat the vault together or lose
+  together.
+- [x] **🏃 Scavenger Dash** — "fetch something yellow — GO". Players physically
+  run and race back (speed points), then show their haul on camera for a best-
+  item vote. The game is real life; the app is the timer and scoreboard.
+- [x] **🔮 Mind Readers** (Colin's idea) — two round types: a spotlight player
+  secretly answers an either/or ("tea or coffee?") and everyone predicts their
+  pick; and "who's more likely to…" where everyone votes a player and you score
+  by matching the majority. Wholesome prompts only — know your colleagues, win.
+
 ## Smaller enhancement ideas
 
 - Custom word lists per room (let the host paste in-jokes before starting Pictionary).

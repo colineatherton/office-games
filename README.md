@@ -43,6 +43,10 @@ Realtime Database — Google infrastructure, which company networks almost never
 | ✏️ [Memory Sketch](memorysketch/) | 3+ | Draw flags & symbols from memory, peers judge |
 | 🧟‍♀️ [Monster Factory](monsterfactory/) | 3+ | Exquisite-corpse monsters, synchronized reveal |
 | 🙈 [Blind Canvas](blindcanvas/) | 3+ | Invisible-ink drawing, comedy reveal |
+| 🌡️ [Wavelength](wavelength/) | 2+ (4+ best) | Psychic dial: clue, guess, steal |
+| 🔐 [The Vault](vault/) | 2+ | Co-op escape room vs the clock |
+| 🏃 [Scavenger Dash](scavenger/) | 3+ | Physically fetch things, show on camera |
+| 🔮 [Mind Readers](mindreaders/) | 3+ | Predict colleagues' preferences & votes |
 
 More ideas in [IDEAS.md](IDEAS.md). Each game page explains its own rules;
 quick summaries below.
@@ -309,3 +313,22 @@ contributors of the finest abomination.
 recorded but you can't see them until the one-at-a-time public reveal (artist
 credit lands three seconds after the laughter). Votes for most recognizable
 and funniest.
+
+**🌡️ Wavelength** — the psychic sees a hidden target on a spectrum ("a snack ↔
+a meal") and gives one spoken clue; their team drags a shared dial to the
+guess. Closer = more points, and if they miss the bullseye the other team can
+steal by calling which side the truth is on.
+
+**🔐 The Vault** — the only co-op game: everyone vs one clock, six sequential
+locks (ciphers, logic, riddles, sequences, acrostics, combinations) across
+three themed vaults. Wrong guesses cost 15 seconds, hints cost 60. Beat the
+vault together, argue about whose fault it was together.
+
+**🏃 Scavenger Dash** — "Fetch something YELLOW — GO." Run, grab, race back
+(fastest returns score), then hold your haul up to the camera for the best-item
+vote. The game is real life; the app is the klaxon and the scoreboard.
+
+**🔮 Mind Readers** — how well do you know each other? Alternates between a
+spotlight player secretly answering an either/or ("tea or coffee?") while
+everyone predicts their pick, and "who's most likely to…" votes where matching
+the majority scores. Wholesome prompts only.

@@ -260,3 +260,15 @@ input:focus, select:focus { outline: 2px solid var(--accent); border-color: tran
   #ladder-wrap { order: 1; min-height: 60vh; }
   .rung .cell { width: 44px; height: 44px; font-size: 1.2rem; }
 }
+
+.how-to {
+  background: rgba(255, 212, 59, .07);
+  border: 1px solid rgba(255, 212, 59, .25);
+  border-radius: 10px;
+  padding: .8rem 1rem;
+  font-size: .9rem;
+  color: var(--muted);
+  line-height: 1.45;
+  text-align: left;
+}
+.how-to strong, .how-to em { color: var(--text); }

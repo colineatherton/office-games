@@ -51,8 +51,14 @@
         <strong id="lobby-code">----</strong>
         <button id="btn-copy-link" class="btn small">Copy invite link</button>
       </div>
-      <p class="hint">Click a team to switch sides. Teams take turns picking letters on
-         the same phrase — wrong letters build <em>your</em> gallows.</p>
+      <div class="how-to">
+        <strong>How it works:</strong> teams take turns picking letters on the same
+        hidden phrase. A hit scores <em>+2 per letter revealed</em> and you keep the
+        turn; a miss adds a piece to <em>your team's</em> gallows — six pieces and
+        you're out of the round. Revealing the last letter earns +10; typing the full
+        solution is +15, but a wrong solve costs a gallows piece. Host picks the rounds.
+      </div>
+      <p class="hint">Click a team to switch sides.</p>
       <div class="teams-row">
         <div id="lobby-team-red" class="team-box red">
           <h3>🔴 Red Team</h3>
@@ -104,6 +110,7 @@
         <div id="phrase-display"></div>
         <div id="last-action">&nbsp;</div>
         <div id="keyboard"></div>
+        <p class="hint">Click a letter — or just type it on your keyboard.</p>
         <div id="solve-row">
           <button id="btn-solve" class="btn">💡 Solve it</button>
           <form id="solve-form" class="hidden">
