@@ -144,6 +144,16 @@ synced through the same Firebase Realtime Database. Checked = built.
   Google Maps API key — one-time setup, free tier covers office use) or
   key-free progressive text clues. Guess map is OpenStreetMap/Leaflet.
 
+## Wave seven — Jackbox-style (teammate request; original names & prompts)
+
+- [x] **💬 Quip Duel** (Quiplash-style) — each prompt is answered by exactly two
+  players; their answers face off and the room votes. Points by vote share,
+  bonus for a shutout. Everyone answers two prompts per round.
+- [x] **🖼️ Fakeout Gallery** (Drawful-style) — everyone draws a different absurd
+  secret prompt; drawings shown one at a time while everyone else submits fake
+  titles, then votes on the real one. Points for finding the truth, fooling
+  people, and being guessable as the artist.
+
 ## Smaller enhancement ideas
 
 - Custom word lists per room (let the host paste in-jokes before starting Pictionary).

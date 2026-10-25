@@ -48,6 +48,8 @@ Realtime Database — Google infrastructure, which company networks almost never
 | 🏃 [Scavenger Dash](scavenger/) | 3+ | Physically fetch things, show on camera |
 | 🔮 [Mind Readers](mindreaders/) | 3+ | Predict colleagues' preferences & votes |
 | 📍 [Globetrotter](globetrotter/) | 2+ | GeoGuessr-style pin drop, Street View or clues |
+| 💬 [Quip Duel](quipduel/) | 3+ | Head-to-head joke writing, room votes, 📺 Big Screen |
+| 🖼️ [Fakeout Gallery](fakeout/) | 3+ | Draw a secret prompt, bluff the titles, 📺 Big Screen |
 
 More ideas in [IDEAS.md](IDEAS.md). Each game page explains its own rules;
 quick summaries below.
@@ -339,3 +341,13 @@ place and drops a pin on the world map; points fall off with distance (5,000
 for a bullseye). Street View walk-around mode needs a one-time Google Maps API
 key (see `maps-config.js` — free tier covers office use); Clue mode needs
 nothing and reveals four progressive hints per round.
+
+**💬 Quip Duel** — every prompt is secretly answered by two players; their
+answers face off anonymously and the room votes. +10 a vote, +30 for a shutout,
+and a Grand Final everyone plays. Supports a 📺 Big Screen view — open it from
+the lobby and screen-share it in the call as the party's TV.
+
+**🖼️ Fakeout Gallery** — everyone draws a different absurd secret prompt; each
+drawing goes up while the others write fake titles, then the room votes on the
+real one. Points for finding the truth, for fooling people, and for drawing
+something actually guessable. 📺 Big Screen supported.
