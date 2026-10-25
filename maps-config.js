@@ -18,5 +18,5 @@
 // ──────────────────────────────────────────────────────────────────────────────
 
 export const mapsConfig = {
-  apiKey: "PASTE_OPTIONAL_GOOGLE_MAPS_KEY",
+  apiKey: "AIzaSyB4EilPx65fzdjFrpucS7wfJFVnL6ecKD8",
 };
