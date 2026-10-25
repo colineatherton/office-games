@@ -47,6 +47,7 @@ Realtime Database — Google infrastructure, which company networks almost never
 | 🔐 [The Vault](vault/) | 2+ | Co-op escape room vs the clock |
 | 🏃 [Scavenger Dash](scavenger/) | 3+ | Physically fetch things, show on camera |
 | 🔮 [Mind Readers](mindreaders/) | 3+ | Predict colleagues' preferences & votes |
+| 📍 [Globetrotter](globetrotter/) | 2+ | GeoGuessr-style pin drop, Street View or clues |
 
 More ideas in [IDEAS.md](IDEAS.md). Each game page explains its own rules;
 quick summaries below.
@@ -332,3 +333,9 @@ vote. The game is real life; the app is the klaxon and the scoreboard.
 spotlight player secretly answering an either/or ("tea or coffee?") while
 everyone predicts their pick, and "who's most likely to…" votes where matching
 the majority scores. Wholesome prompts only.
+
+**📍 Globetrotter** — GeoGuessr for the office: everyone sees the same mystery
+place and drops a pin on the world map; points fall off with distance (5,000
+for a bullseye). Street View walk-around mode needs a one-time Google Maps API
+key (see `maps-config.js` — free tier covers office use); Clue mode needs
+nothing and reveals four progressive hints per round.

@@ -136,6 +136,14 @@ synced through the same Firebase Realtime Database. Checked = built.
   pick; and "who's more likely to…" where everyone votes a player and you score
   by matching the majority. Wholesome prompts only — know your colleagues, win.
 
+## Wave six — requests from the team
+
+- [x] **📍 Globetrotter** (teammate's request) — GeoGuessr-style: everyone sees
+  the same mystery location and drops a pin on a world map; closest wins,
+  points fall off with distance. Two modes: Street View walk-around (needs a
+  Google Maps API key — one-time setup, free tier covers office use) or
+  key-free progressive text clues. Guess map is OpenStreetMap/Leaflet.
+
 ## Smaller enhancement ideas
 
 - Custom word lists per room (let the host paste in-jokes before starting Pictionary).
