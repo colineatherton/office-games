@@ -6,10 +6,10 @@
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
-  getDatabase, ref, child, get, set, update, onValue, onDisconnect,
-  runTransaction, serverTimestamp,
+  getDatabase, ref, child, get, set, update, onValue, runTransaction, serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { firebaseConfig } from "../firebase-config.js";
+import { trackPresence } from "../presence.js";
 import { SPECTRUMS } from "./spectrums.js";
 
 const $ = (id) => document.getElementById(id);
@@ -37,6 +37,9 @@ let serverOffset = 0;
 let needleLocal = 50;      // the needle value this client currently displays
 let dragging = false;
 let lowPlayersSince = null;
+// A genuine reconnect (phone waking, wifi roaming) can take a good few
+// seconds; 10s of grace used to dump a whole room back to the lobby.
+const ABANDON_MS = 45000;
 let psychicGoneSince = null;
 
 const nowSrv = () => Date.now() + serverOffset;
@@ -142,7 +145,7 @@ async function enterRoom(code, name) {
     joinedAt: existing?.joinedAt || serverTimestamp(),
     timesPsychic: existing?.timesPsychic || 0,
   });
-  onDisconnect(child(meRefNode, "connected")).set(false);
+  trackPresence(db, meRefNode);
 
   onValue(metaRef(), (s) => { meta = s.val(); if (meta) render(); });
   onValue(playersRef(), (s) => { players = s.val() || {}; render(); });
@@ -334,7 +337,7 @@ setInterval(() => {
   const emptyTeam = !conn.some((p) => p.team === "red") || !conn.some((p) => p.team === "blue");
   if (active && (conn.length < 2 || emptyTeam)) {
     lowPlayersSince ??= Date.now();
-    if (isHost() && Date.now() - lowPlayersSince > 10000) {
+    if (isHost() && Date.now() - lowPlayersSince > ABANDON_MS) {
       txMeta((m) => (m.state === "lobby" || m.state === "gameEnd") ? undefined
         : { ...m, state: "lobby", turn: null, usedSpectrums: null });
     }
@@ -364,9 +367,21 @@ setInterval(() => {
   }
 }, 400);
 
+// How long the host may be unreachable before somebody else takes over. The
+// whole state machine is host-gated, so during this window nothing advances and
+// nothing aborts — which is exactly what we want while a host's wifi reconnects.
+const HOST_GRACE_MS = 12000;
+let hostGoneSince = null;
+
 function claimHostIfAbandoned() {
   if (!meta || !Object.keys(players).length) return;
-  if (players[meta.hostId]?.connected) return;
+  if (players[meta.hostId]?.connected) { hostGoneSince = null; return; }
+  // A host whose connection drops is almost always blipping, not leaving.
+  // Grabbing the role straight away used to hand the next client a view of the
+  // room in which the absent host had "finished" every pending submission or
+  // vote, so the round advanced or the room reset out from under them.
+  hostGoneSince ??= Date.now();
+  if (Date.now() - hostGoneSince < HOST_GRACE_MS) return;
   const conn = Object.entries(players)
     .filter(([, p]) => p.connected)
     .sort((a, b) => (a[1].joinedAt || 0) - (b[1].joinedAt || 0));

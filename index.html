@@ -57,6 +57,28 @@
   .chip:hover { filter: brightness(1.25); }
   .chip.active { background: var(--accent); color: #1a1500; border-color: transparent; font-weight: 600; }
   .filters .sep { color: var(--border); margin: 0 .2rem; }
+  .chip.dice { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+  .chip.dice:hover { background: var(--accent); color: #1a1500; }
+  .chip.dice.rolling { animation: shake .28s linear infinite; }
+  @keyframes shake {
+    0%, 100% { transform: rotate(-7deg); } 50% { transform: rotate(7deg); }
+  }
+
+  /* The card the dice landed on */
+  .card.picked {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent), 0 8px 26px rgba(255, 212, 59, .22);
+  }
+  .picked-flag {
+    align-self: flex-start; font-size: .72rem; font-weight: 600;
+    background: var(--accent); color: #1a1500; text-decoration: none;
+    border-radius: 999px; padding: .18rem .6rem;
+  }
+  .picked-flag:hover { filter: brightness(1.1); }
+  @media (prefers-reduced-motion: reduce) {
+    .chip.dice.rolling { animation: none; }
+    .card { transition: none; }
+  }
   .jump {
     color: var(--muted); text-decoration: none; font-size: .85rem;
     padding: .32rem .5rem; border-radius: 8px;
@@ -146,6 +168,8 @@
 <div class="filters" id="filters">
   <input id="game-search" type="search" placeholder="🔎 Search games…" autocomplete="off"
          style="background:#0e101a;border:1px solid var(--border);border-radius:999px;color:var(--text);font-size:.85rem;padding:.32rem .85rem;width:170px;">
+  <button class="chip dice" id="btn-random" title="Pick a random game from whatever's currently shown">🎲 Surprise me</button>
+  <span class="sep">|</span>
   <button class="chip active" data-f="all">All</button>
   <button class="chip" data-f="teams">🔴🔵 Teams</button>
   <button class="chip" data-f="solo">🙋 Solo scores</button>
@@ -599,7 +623,7 @@
 </div>
 
 <script>
-  const chips = document.querySelectorAll(".chip");
+  const chips = document.querySelectorAll(".chip[data-f]");
   const cards = document.querySelectorAll(".card");
   const sections = document.querySelectorAll("section");
   const search = document.getElementById("game-search");
@@ -624,6 +648,56 @@
     applyFilters();
   }));
   search.addEventListener("input", applyFilters);
+
+  // ── 🎲 Surprise me ──────────────────────────────────────────────────────────
+  // Picks from whatever is currently on screen, so it respects the format chips
+  // and the search box: filter to "🤝 Co-op", roll, and you get a co-op game.
+  const dice = document.getElementById("btn-random");
+  let lastPick = null;
+
+  function clearPick() {
+    const prev = document.querySelector(".card.picked");
+    if (!prev) return;
+    prev.classList.remove("picked");
+    prev.querySelector(".picked-flag")?.remove();
+  }
+
+  function roll() {
+    clearPick();
+    const pool = [...cards].filter((c) => !c.classList.contains("hidden"));
+    if (!pool.length) {
+      dice.textContent = "🎲 Nothing matches";
+      setTimeout(() => { dice.textContent = "🎲 Surprise me"; }, 1400);
+      return;
+    }
+    // Don't serve the same game twice in a row — re-rolling should feel useful.
+    const choices = pool.length > 1 ? pool.filter((c) => c !== lastPick) : pool;
+    const card = choices[Math.floor(Math.random() * choices.length)];
+    lastPick = card;
+
+    const link = card.querySelector(".card-top");
+    const title = card.querySelector("h3").textContent;
+
+    const flag = document.createElement("a");
+    flag.className = "picked-flag";
+    flag.href = link.getAttribute("href");
+    flag.textContent = `🎲 The dice say: ${title} — play it →`;
+    card.prepend(flag);
+    card.classList.add("picked");
+
+    card.scrollIntoView({ behavior: "smooth", block: "center" });
+    // Announce the result for anyone not watching the scroll happen.
+    dice.setAttribute("aria-label", `Random pick: ${title}`);
+  }
+
+  dice.addEventListener("click", () => {
+    dice.classList.add("rolling");
+    setTimeout(() => { dice.classList.remove("rolling"); roll(); }, 320);
+  });
+
+  // A pick that's been filtered off-screen shouldn't keep its halo.
+  search.addEventListener("input", clearPick);
+  chips.forEach((c) => c.addEventListener("click", clearPick));
 </script>
 </body>
 </html>

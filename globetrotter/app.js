@@ -7,9 +7,10 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
   getDatabase, ref, child, get, set, update, remove,
-  onValue, onDisconnect, runTransaction, serverTimestamp,
+  onValue, runTransaction, serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { firebaseConfig } from "../firebase-config.js";
+import { trackPresence } from "../presence.js";
 import { mapsConfig } from "../maps-config.js";
 import { STREETVIEW_SPOTS, CLUE_SPOTS } from "./locations.js";
 
@@ -168,7 +169,7 @@ async function enterRoom(code, name) {
     score: existing?.score || 0,
     lockedRound: Math.max(existing?.lockedRound || 0, midRoundLock),
   });
-  onDisconnect(child(meRef, "connected")).set(false);
+  trackPresence(db, meRef);
 
   onValue(metaRef(), (s) => { meta = s.val(); if (meta) render(); });
   onValue(playersRef(), (s) => { players = s.val() || {}; render(); });
@@ -710,9 +711,21 @@ setInterval(() => {
   }
 }, 400);
 
+// How long the host may be unreachable before somebody else takes over. The
+// whole state machine is host-gated, so during this window nothing advances and
+// nothing aborts — which is exactly what we want while a host's wifi reconnects.
+const HOST_GRACE_MS = 12000;
+let hostGoneSince = null;
+
 function claimHostIfAbandoned() {
   if (!meta || !Object.keys(players).length) return;
-  if (players[meta.hostId]?.connected) return;
+  if (players[meta.hostId]?.connected) { hostGoneSince = null; return; }
+  // A host whose connection drops is almost always blipping, not leaving.
+  // Grabbing the role straight away used to hand the next client a view of the
+  // room in which the absent host had "finished" every pending submission or
+  // vote, so the round advanced or the room reset out from under them.
+  hostGoneSince ??= Date.now();
+  if (Date.now() - hostGoneSince < HOST_GRACE_MS) return;
   const conn = Object.entries(players)
     .filter(([, p]) => p.connected)
     .sort((a, b) => (a[1].joinedAt || 0) - (b[1].joinedAt || 0));
