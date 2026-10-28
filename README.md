@@ -87,7 +87,9 @@ reconnects, and the host role passes on if the host disappears.
 > [`games.js`](games.js) (the machine-readable catalogue the vote page reads).
 > `node vote/validate-catalogue.mjs` checks all three match — and that the
 > folder actually exists. `node vote/test-tally.mjs` covers the vote
-> arithmetic, and `node emoji/validate-palette.mjs` the emoji palette.
+> arithmetic, `node emoji/validate-palette.mjs` the emoji palette, and
+> `node globetrotter/validate-locations.mjs` the map locations (duplicates,
+> bad coordinates, clues that give the answer away).
 
 ---
 
