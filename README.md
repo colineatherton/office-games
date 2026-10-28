@@ -375,7 +375,13 @@ the majority scores. Wholesome prompts only.
 place and drops a pin on the world map; points fall off with distance (5,000
 for a bullseye). Street View walk-around mode needs a one-time Google Maps API
 key (see `maps-config.js` — free tier covers office use); Clue mode needs
-nothing and reveals four progressive hints per round.
+nothing and reveals progressive hints per round. Three difficulties: **Easy**
+is famous landmarks (and in Clue mode opens with two hints showing), **Normal**
+mixes in ordinary towns, and **Hard** drops you on an anonymous street with the
+view *frozen* — no walking, no looking around, no zoom — or, in Clue mode,
+gives you only the two cryptic hints and never the giveaway. The guess map is
+labelled in English everywhere (Esri's basemap; plain OpenStreetMap labels each
+place in its own language, which doesn't help if you can't read it).
 
 **💬 Quip Duel** — every prompt is secretly answered by two players; their
 answers face off anonymously and the room votes. +10 a vote, +30 for a shutout,

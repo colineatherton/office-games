@@ -1,12 +1,23 @@
 // Locations for Globetrotter.
 //
-// STREETVIEW_SPOTS: world-famous outdoor spots with reliable Google Street View
-// coverage (no mainland China / Cuba — no coverage there). Coordinates are the
-// landmark itself; the game snaps to the nearest panorama within 200 m and the
-// host's client skips a spot defensively if no imagery is found.
+// STREETVIEW_SPOTS: world-famous outdoor spots — the Easy/Normal pool.
+// OFFBEAT_SPOTS:    ordinary towns and streets with no giveaway landmark —
+//                   the Hard pool, where you have to read the road markings,
+//                   the script on the shop signs and the vegetation instead.
+//
+// Both lists are verified against the live Street View API (see the audit in
+// the commit that added Hard mode): every entry resolves to an *official
+// Google* outdoor panorama with walkable links within 300 m. That filter
+// matters — searching with `source: OUTDOOR` alone matches user-contributed
+// photospheres, and at famous landmarks those are what you get: 54 of these 61
+// spots used to open inside somebody's indoor 360 of a lobby or gift shop,
+// with nowhere to walk. The app now asks for GOOGLE + OUTDOOR.
+//
+// No mainland China / Cuba — no coverage there.
 //
 // CLUE_SPOTS: famous places with four progressive clues, cryptic → giveaway.
-// A clue must never contain the answer's name.
+// A clue must never contain the answer's name. Hard mode shows only the first
+// two (the cryptic ones); Easy opens with two already on screen.
 
 export const STREETVIEW_SPOTS = [
   { name: "Times Square, New York", lat: 40.758, lng: -73.9855 },
@@ -70,6 +81,74 @@ export const STREETVIEW_SPOTS = [
   { name: "Sensō-ji temple, Tokyo", lat: 35.7148, lng: 139.7967 },
   { name: "Fushimi Inari shrine, Kyoto", lat: 34.9671, lng: 135.7727 },
   { name: "Chapel Bridge, Lucerne", lat: 47.0517, lng: 8.3075 },
+];
+
+export const OFFBEAT_SPOTS = [
+  { name: "Kuopio, Finland", lat: 62.8924, lng: 27.677 },
+  { name: "Hveragerði, Iceland", lat: 64.0005, lng: -21.1869 },
+  { name: "Narva, Estonia", lat: 59.3797, lng: 28.1903 },
+  { name: "Ventspils, Latvia", lat: 57.3894, lng: 21.5606 },
+  { name: "Zakopane, Poland", lat: 49.2992, lng: 19.9496 },
+  { name: "Sibiu, Romania", lat: 45.7983, lng: 24.1256 },
+  { name: "Veliko Tarnovo, Bulgaria", lat: 43.0757, lng: 25.6172 },
+  { name: "Mostar, Bosnia and Herzegovina", lat: 43.3438, lng: 17.8078 },
+  { name: "Bled, Slovenia", lat: 46.3683, lng: 14.1146 },
+  { name: "Český Krumlov, Czechia", lat: 48.8109, lng: 14.315 },
+  { name: "Ålesund, Norway", lat: 62.4722, lng: 6.1549 },
+  { name: "Tralee, Ireland", lat: 52.2713, lng: -9.7016 },
+  { name: "Aberystwyth, Wales", lat: 52.4153, lng: -4.0829 },
+  { name: "Colmar, France", lat: 48.0794, lng: 7.3585 },
+  { name: "Évora, Portugal", lat: 38.5714, lng: -7.9135 },
+  { name: "Matera, Italy", lat: 40.6664, lng: 16.6043 },
+  { name: "Ronda, Spain", lat: 36.742, lng: -5.1673 },
+  { name: "Kotor, Montenegro", lat: 42.4247, lng: 18.7712 },
+  { name: "Ohrid, North Macedonia", lat: 41.1172, lng: 20.8019 },
+  { name: "Lviv, Ukraine", lat: 49.8397, lng: 24.0297 },
+  { name: "Takayama, Japan", lat: 36.1461, lng: 137.2522 },
+  { name: "Jeonju, South Korea", lat: 35.8242, lng: 127.148 },
+  { name: "Hualien, Taiwan", lat: 23.9769, lng: 121.6044 },
+  { name: "Chiang Rai, Thailand", lat: 19.9105, lng: 99.8406 },
+  { name: "Hội An, Vietnam", lat: 15.8801, lng: 108.338 },
+  { name: "Luang Prabang, Laos", lat: 19.8867, lng: 102.135 },
+  { name: "Kandy, Sri Lanka", lat: 7.2906, lng: 80.6337 },
+  { name: "Pokhara, Nepal", lat: 28.2096, lng: 83.9856 },
+  { name: "Malacca, Malaysia", lat: 2.1896, lng: 102.2501 },
+  { name: "Ubud, Bali, Indonesia", lat: -8.5069, lng: 115.2625 },
+  { name: "Vigan, Philippines", lat: 17.5747, lng: 120.3869 },
+  { name: "Ulaanbaatar, Mongolia", lat: 47.8864, lng: 106.9057 },
+  { name: "Nazareth, Israel", lat: 32.7021, lng: 35.2978 },
+  { name: "Madaba, Jordan", lat: 31.716, lng: 35.795 },
+  { name: "Swakopmund, Namibia", lat: -22.6792, lng: 14.5272 },
+  { name: "Stellenbosch, South Africa", lat: -33.9321, lng: 18.8602 },
+  { name: "Nakuru, Kenya", lat: -0.3031, lng: 36.08 },
+  { name: "Kigali, Rwanda", lat: -1.9536, lng: 30.0606 },
+  { name: "Dakar, Senegal", lat: 14.6928, lng: -17.4467 },
+  { name: "Accra, Ghana", lat: 5.6037, lng: -0.187 },
+  { name: "Gaborone, Botswana", lat: -24.6282, lng: 25.9231 },
+  { name: "Salta, Argentina", lat: -24.7821, lng: -65.4232 },
+  { name: "Cuenca, Ecuador", lat: -2.9001, lng: -79.0059 },
+  { name: "Villa de Leyva, Colombia", lat: 5.6339, lng: -73.525 },
+  { name: "Colonia del Sacramento, Uruguay", lat: -34.4713, lng: -57.8448 },
+  { name: "Antigua, Guatemala", lat: 14.5586, lng: -90.7295 },
+  { name: "Gander, Newfoundland, Canada", lat: 48.956, lng: -54.6089 },
+  { name: "Taos, New Mexico, USA", lat: 36.4072, lng: -105.5731 },
+  { name: "Marfa, Texas, USA", lat: 30.3096, lng: -104.0207 },
+  { name: "Ouro Preto, Brazil", lat: -20.3855, lng: -43.5036 },
+  { name: "Puerto Natales, Chile", lat: -51.7236, lng: -72.4875 },
+  { name: "Rotorua, New Zealand", lat: -38.1368, lng: 176.2497 },
+  { name: "Broome, Australia", lat: -17.9644, lng: 122.2304 },
+  { name: "Kalgoorlie, Australia", lat: -30.7489, lng: 121.4656 },
+  { name: "Trondheim, Norway", lat: 63.4305, lng: 10.3951 },
+  { name: "Batumi, Georgia", lat: 41.6459, lng: 41.6417 },
+  { name: "Almaty, Kazakhstan", lat: 43.2389, lng: 76.8897 },
+  { name: "Bishkek, Kyrgyzstan", lat: 42.8746, lng: 74.5698 },
+  { name: "Puducherry, India", lat: 11.934, lng: 79.83 },
+  { name: "Thimphu, Bhutan", lat: 27.4712, lng: 89.6339 },
+  { name: "Nuuk, Greenland", lat: 64.1835, lng: -51.7216 },
+  { name: "Tbilisi, Georgia", lat: 41.6938, lng: 44.8015 },
+  { name: "Da Lat, Vietnam", lat: 11.9404, lng: 108.4583 },
+  { name: "Arequipa, Peru", lat: -16.3989, lng: -71.5369 },
+  { name: "Valparaíso, Chile", lat: -33.0369, lng: -71.6256 },
 ];
 
 export const CLUE_SPOTS = [

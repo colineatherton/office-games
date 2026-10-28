@@ -64,12 +64,20 @@
         <h3>Players</h3>
         <ul id="lobby-player-list"></ul>
       </div>
+      <p id="difficulty-note" class="hint"></p>
       <div id="lobby-host-controls" class="hidden">
         <div class="settings-row">
           <label>Mode
             <select id="set-mode">
               <option value="clue" selected>🕵️ Clue mode</option>
               <option value="streetview">🚶 Street View</option>
+            </select>
+          </label>
+          <label>Difficulty
+            <select id="set-difficulty">
+              <option value="easy">🙂 Easy</option>
+              <option value="normal" selected>😐 Normal</option>
+              <option value="hard">💀 Hard</option>
             </select>
           </label>
           <label>Rounds
@@ -110,7 +118,14 @@
       <!-- Exploring: mystery location + guess map -->
       <div id="view-explore" class="task-view hidden">
         <div id="explore-panel">
-          <div id="pano" class="hidden"></div>
+          <div id="pano-wrap">
+            <div id="pano" class="hidden"></div>
+            <!-- Hard mode's lid: Street View has no "disable dragging" option,
+                 so a transparent layer swallows drags, clicks and scrolls. -->
+            <div id="pano-lock" class="hidden" title="Frozen view — hard mode">
+              <span class="lock-badge">🧊 Frozen view</span>
+            </div>
+          </div>
           <p id="pano-status" class="hint hidden"></p>
           <div id="clue-card" class="panel hidden">
             <h2>🕵️ Where in the world…?</h2>

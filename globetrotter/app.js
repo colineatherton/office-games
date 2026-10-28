@@ -1,8 +1,9 @@
 // Globetrotter — GeoGuessr for the office, synced through Firebase RTDB.
 // Two modes: "streetview" (Google Street View walk-around, needs an API key in
-// ../maps-config.js) and "clue" (progressive text clues, no key needed). The
-// guess map is always Leaflet + OpenStreetMap (self-hosted Leaflet in vendor/).
-// Leaflet's global `L` comes from the plain <script> tag in index.html.
+// ../maps-config.js) and "clue" (progressive text clues, no key needed), each
+// with three difficulties (see DIFFICULTY below). The guess map is always
+// Leaflet (self-hosted in vendor/) over Esri's English-labelled basemap —
+// see addBasemap. Leaflet's `L` comes from the <script> tag in index.html.
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
@@ -12,7 +13,7 @@ import {
 import { firebaseConfig } from "../firebase-config.js";
 import { trackPresence } from "../presence.js";
 import { mapsConfig } from "../maps-config.js";
-import { STREETVIEW_SPOTS, CLUE_SPOTS } from "./locations.js";
+import { STREETVIEW_SPOTS, OFFBEAT_SPOTS, CLUE_SPOTS } from "./locations.js";
 
 const $ = (id) => document.getElementById(id);
 
@@ -47,6 +48,11 @@ let revealShownFor = -1;
 let guessMap = null, guessPin = null;
 let revealMap = null, revealLayer = null;
 let gmapsPromise = null, pano = null, svService = null;
+// Consecutive Street View lookups that came back with nothing. A couple is
+// normal (coverage moves); a run of them means the key or its restrictions are
+// wrong, and shuffling locations forever would hide that.
+let panoFails = 0;
+const MAX_PANO_FAILS = 3;
 
 const nowSrv = () => Date.now() + serverOffset;
 const metaRef = () => ref(db, `rooms/${roomCode}/meta`);
@@ -61,6 +67,27 @@ onValue(ref(db, ".info/serverTimeOffset"), (s) => { serverOffset = s.val() || 0;
 const rand = (arr) => arr[Math.floor(Math.random() * arr.length)];
 const wrapLng = (lng) => ((lng + 180) % 360 + 360) % 360 - 180;
 
+// ── Difficulty ────────────────────────────────────────────────────────────────
+// One setting, read differently by each mode.
+//
+//   pools   which Street View lists the round is drawn from ("s" = famous
+//           landmarks, "o" = offbeat towns — see locations.js)
+//   frozen  no walking, no panning, no zooming: one fixed view, GeoGuessr's
+//           NMPZ. Street View offers no option for "don't let them drag", so
+//           the pano gets a transparent lid (#pano-lock) that eats the events.
+//   clues / openClues  clue mode: how many of the four clues ever appear, and
+//           how many are on screen at the start. Hard never reaches the
+//           giveaway clue — you get the two cryptic ones and your wits.
+const DIFFICULTY = {
+  easy:   { label: "🙂 Easy",   pools: ["s"],      frozen: false, clues: 4, openClues: 2 },
+  normal: { label: "😐 Normal", pools: ["s", "o"], frozen: false, clues: 4, openClues: 1 },
+  hard:   { label: "💀 Hard",   pools: ["o"],      frozen: true,  clues: 2, openClues: 1 },
+};
+const diffOf = (m) => DIFFICULTY[m?.settings?.difficulty] || DIFFICULTY.normal;
+const diff = () => diffOf(meta);
+
+const POOL_LIST = { s: STREETVIEW_SPOTS, o: OFFBEAT_SPOTS, c: CLUE_SPOTS };
+
 function haversineKm(lat1, lon1, lat2, lon2) {
   const R = 6371, toR = Math.PI / 180;
   const dLat = (lat2 - lat1) * toR, dLon = (lon2 - lon1) * toR;
@@ -71,18 +98,30 @@ function haversineKm(lat1, lon1, lat2, lon2) {
 const scoreFor = (km) => Math.round(5000 * Math.exp(-km / 1500));
 
 function roundSpot(r) {
-  return r.mode === "streetview" ? STREETVIEW_SPOTS[r.locIdx] : CLUE_SPOTS[r.locIdx];
+  // `pool` arrived with difficulty; rooms created before it only ever used the
+  // famous list in Street View mode.
+  const pool = r.pool || (r.mode === "streetview" ? "s" : "c");
+  return POOL_LIST[pool]?.[r.locIdx];
 }
 
-// Pick an unused location index for a mode; usedLocs keys are "s12"/"c7".
-function pickLocation(mode, used) {
-  const list = mode === "streetview" ? STREETVIEW_SPOTS : CLUE_SPOTS;
-  const prefix = mode === "streetview" ? "s" : "c";
+// Pick an unused location for a mode; usedLocs keys are "s12"/"o3"/"c7", so a
+// game can mix pools without the indices colliding.
+function pickLocation(mode, settings, used) {
+  const pools = mode === "streetview" ? diffOf({ settings }).pools : ["c"];
   let fresh = [];
-  for (let i = 0; i < list.length; i++) if (!used[prefix + i]) fresh.push(i);
-  if (!fresh.length) fresh = list.map((_, i) => i); // pool exhausted — recycle
-  const idx = rand(fresh);
-  return { idx, used: { ...used, [prefix + idx]: true } };
+  for (const p of pools) {
+    POOL_LIST[p].forEach((_, i) => { if (!used[p + i]) fresh.push([p, i]); });
+  }
+  // Pool exhausted (a long night) — recycle rather than repeat the same spot.
+  if (!fresh.length) for (const p of pools) POOL_LIST[p].forEach((_, i) => fresh.push([p, i]));
+  const [pool, idx] = rand(fresh);
+  return {
+    pool, idx,
+    used: { ...used, [pool + idx]: true },
+    // Everyone starts facing the same way — and in frozen mode that's the only
+    // way they'll ever face, so it must come from the room, not the client.
+    heading: Math.floor(Math.random() * 360),
+  };
 }
 
 // ── Screens ───────────────────────────────────────────────────────────────────
@@ -126,7 +165,7 @@ $("btn-create").addEventListener("click", async () => {
       createdAt: serverTimestamp(),
       hostId: pid,
       state: "lobby",
-      settings: { rounds: 5, guessSeconds: 90, mode: "clue" },
+      settings: { rounds: 5, guessSeconds: 90, mode: "clue", difficulty: "normal" },
     });
     await enterRoom(code, name);
   } catch (e) {
@@ -203,11 +242,11 @@ async function startGame() {
   await txMeta((m) => {
     if (m.state !== "lobby") return;
     const mode = hasKey && m.settings.mode === "streetview" ? "streetview" : "clue";
-    const pick = pickLocation(mode, {});
+    const pick = pickLocation(mode, m.settings, {});
     return {
       ...m, state: "exploring", usedLocs: pick.used,
       round: {
-        num: 1, mode, locIdx: pick.idx,
+        num: 1, mode, locIdx: pick.idx, pool: pick.pool, heading: pick.heading,
         createdAt: nowSrv(),
         endsAt: nowSrv() + m.settings.guessSeconds * 1000,
       },
@@ -220,11 +259,11 @@ function repickLocation() {
   const n = meta?.round?.num;
   txMeta((m) => {
     if (m.state !== "exploring" || m.round?.num !== n) return;
-    const pick = pickLocation(m.round.mode, m.usedLocs || {});
+    const pick = pickLocation(m.round.mode, m.settings, m.usedLocs || {});
     return {
       ...m, usedLocs: pick.used,
       round: {
-        ...m.round, locIdx: pick.idx,
+        ...m.round, locIdx: pick.idx, pool: pick.pool, heading: pick.heading,
         createdAt: nowSrv(),
         endsAt: nowSrv() + m.settings.guessSeconds * 1000,
       },
@@ -266,11 +305,11 @@ function nextRound() {
     if (m.state !== "reveal" || m.round?.num !== n) return;
     if (n >= m.settings.rounds) return { ...m, state: "gameEnd" };
     const mode = hasKey && m.settings.mode === "streetview" ? "streetview" : "clue";
-    const pick = pickLocation(mode, m.usedLocs || {});
+    const pick = pickLocation(mode, m.settings, m.usedLocs || {});
     return {
       ...m, state: "exploring", usedLocs: pick.used,
       round: {
-        num: n + 1, mode, locIdx: pick.idx,
+        num: n + 1, mode, locIdx: pick.idx, pool: pick.pool, heading: pick.heading,
         createdAt: nowSrv(),
         endsAt: nowSrv() + m.settings.guessSeconds * 1000,
         results: null, bestPid: null,
@@ -306,13 +345,36 @@ function lockGuess(auto = false) {
 }
 $("btn-lock").addEventListener("click", () => lockGuess(false));
 
+// ── Basemap ───────────────────────────────────────────────────────────────────
+// Esri's World Street Map rather than standard OSM tiles, for one reason: it
+// labels the world in English. OSM renders each place in its *local* language,
+// so at the zoom you actually drop a pin you're picking between 中国, ประเทศไทย
+// and မြန်မာ — fine if you read them, useless otherwise. Esri labels the same
+// tiles "CHINA", "MYANMAR (BURMA)", "Seoul City Hall", keeping the local name
+// alongside. No API key, attribution required.
+//
+// If Esri is unreachable, fall back to OSM rather than showing a blank world.
+const ESRI_URL = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}";
+const ESRI_ATTR = "Tiles &copy; Esri — Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, " +
+  "NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom";
+
+function addBasemap(map) {
+  const esri = L.tileLayer(ESRI_URL, { attribution: ESRI_ATTR, maxZoom: 19 }).addTo(map);
+  let errors = 0;
+  esri.on("tileerror", () => {
+    if (++errors < 6 || !map.hasLayer(esri)) return;
+    map.removeLayer(esri);
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "&copy; OpenStreetMap contributors", maxZoom: 19,
+    }).addTo(map);
+  });
+  return esri;
+}
+
 function ensureGuessMap() {
   if (guessMap) return;
   guessMap = L.map("guess-map", { worldCopyJump: true, minZoom: 1 }).setView([22, 10], 1);
-  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    attribution: "&copy; OpenStreetMap contributors",
-    maxZoom: 19,
-  }).addTo(guessMap);
+  addBasemap(guessMap);
   guessMap.on("click", (e) => {
     if (iLocked() || meta?.state !== "exploring") return;
     placePin(e.latlng);
@@ -340,22 +402,61 @@ function clearPin() {
 }
 
 // ── Street View ───────────────────────────────────────────────────────────────
+// Google calls this when it rejects the key — almost always because the key's
+// referrer restrictions don't list the site it's running on (see
+// maps-config.js). Without it the game looks like it merely can't find
+// imagery, and the host's client shuffles through locations forever.
+let mapsAuthFailed = false;
+window.gm_authFailure = () => { mapsAuthFailed = true; };
+
 function loadGoogleMaps() {
   if (gmapsPromise) return gmapsPromise;
   gmapsPromise = new Promise((resolve, reject) => {
     window.__gmapsReady = () => resolve(window.google);
     const s = document.createElement("script");
-    s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(mapsConfig.apiKey)}&v=weekly&callback=__gmapsReady`;
+    // language=en so any Google-rendered text matches the rest of the game.
+    s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(mapsConfig.apiKey)}&v=weekly&language=en&callback=__gmapsReady`;
     s.onerror = () => reject(new Error("Google Maps failed to load"));
     document.head.appendChild(s);
   });
   return gmapsPromise;
 }
 
+/**
+ * Find a panorama to drop the room into.
+ *
+ * `source: OUTDOOR` alone is not enough: it still matches user-contributed
+ * photospheres, and at a famous landmark those outnumber Google's own imagery
+ * — an audit of this game's 61 spots found 54 resolving to somebody's personal
+ * 360, often shot inside a lobby or gift shop and with no links to walk along.
+ * That is the "why am I in a building?" bug. Asking for GOOGLE *and* OUTDOOR
+ * (the sources are intersected) gets the real Street View car imagery.
+ *
+ * Falls back to a wider search before giving up — 1 km is nothing on a scale
+ * where 1,500 km still scores points, and it rescues spots whose square the
+ * camera car couldn't drive into.
+ */
+async function findPano(g, spot) {
+  const S = g.maps.StreetViewSource;
+  // `sources` (plural, intersected) is the modern field; keep a path for an
+  // older Maps build that only knows `source`.
+  const pick = S.GOOGLE ? { sources: [S.GOOGLE, S.OUTDOOR] } : { source: S.OUTDOOR };
+  for (const radius of [spot.radius || 200, 1000]) {
+    try {
+      return await svService.getPanorama({
+        location: { lat: spot.lat, lng: spot.lng }, radius, ...pick,
+      });
+    } catch { /* widen, then give up and let the host repick */ }
+  }
+  return null;
+}
+
 async function initPano(spot, forRound) {
+  $("pano-wrap").classList.remove("hidden");
   $("pano").classList.remove("hidden");
   $("clue-card").classList.add("hidden");
   setPanoStatus("Loading imagery…");
+  const frozen = diff().frozen;
   try {
     const g = await loadGoogleMaps();
     if (meta?.round?.num !== forRound || meta?.state !== "exploring") return;
@@ -370,19 +471,42 @@ async function initPano(spot, forRound) {
         motionTrackingControl: false,
       });
     }
-    svService = svService || new g.maps.StreetViewService();
-    const res = await svService.getPanorama({
-      location: { lat: spot.lat, lng: spot.lng },
-      radius: 200,
-      source: g.maps.StreetViewSource.OUTDOOR,
+    // Hard mode: no walking, no zooming, and the lid below kills dragging.
+    pano.setOptions({
+      linksControl: !frozen,
+      clickToGo: !frozen,
+      scrollwheel: !frozen,
+      panControl: !frozen,
+      zoomControl: !frozen,
+      disableDoubleClickZoom: frozen,
     });
+    $("pano-lock").classList.toggle("hidden", !frozen);
+
+    svService = svService || new g.maps.StreetViewService();
+    const res = await findPano(g, spot);
     if (meta?.round?.num !== forRound || meta?.state !== "exploring") return;
+    if (!res) throw new Error("no imagery");
+
     pano.setPano(res.data.location.pano);
-    pano.setPov({ heading: 0, pitch: 0 });
+    pano.setPov({ heading: meta.round.heading || 0, pitch: 0 });
     pano.setZoom(0);
     pano.setVisible(true);
     setPanoStatus("");
+    panoFails = 0;
   } catch (e) {
+    // A rejected key fails *every* location, so repicking just shuffles the
+    // world forever. Say what's actually wrong and stop.
+    if (mapsAuthFailed) {
+      setPanoStatus("⚠️ Google rejected this site's Maps API key — add this site to the key's " +
+        "website restrictions (see maps-config.js). Guess from the map, or play Clue mode.");
+      return;
+    }
+    panoFails++;
+    if (panoFails > MAX_PANO_FAILS) {
+      setPanoStatus("⚠️ Street View keeps coming back empty — check the Maps API key and its " +
+        "restrictions (maps-config.js). You can still drop a pin.");
+      return;
+    }
     setPanoStatus("No imagery at this spot — finding another…");
     if (isHost() && meta?.round?.num === forRound && meta?.state === "exploring") {
       setTimeout(() => {
@@ -417,7 +541,10 @@ function render() {
   if (meta.state === "exploring") {
     setupRound();
     showView("explore");
-    $("mode-label").textContent = r.mode === "streetview" ? "🚶 Walk around… where are you?" : "🕵️ Read the clues… where is it?";
+    $("mode-label").textContent =
+      r.mode !== "streetview" ? "🕵️ Read the clues… where is it?"
+      : diff().frozen ? "🧊 One frozen view — no moving, no looking around"
+      : "🚶 Walk around… where are you?";
     renderClues();
     renderLockButton();
     renderLockedList();
@@ -460,7 +587,24 @@ function renderLobby() {
     }
     $("set-rounds").value = String(meta.settings.rounds);
     $("set-seconds").value = String(meta.settings.guessSeconds);
+    $("set-difficulty").value = meta.settings.difficulty || "normal";
   }
+  $("difficulty-note").textContent = difficultyNote();
+}
+
+// What the chosen difficulty actually does, in the mode they've chosen.
+function difficultyNote() {
+  const key = meta.settings.difficulty || "normal";
+  const sv = (meta.settings.mode === "streetview") && hasKey;
+  const notes = {
+    easy: sv ? "World-famous spots. Walk, look and zoom freely."
+             : "Two clues up front, all four by halfway.",
+    normal: sv ? "Famous landmarks mixed with ordinary towns. Walk, look and zoom freely."
+               : "Four clues, revealing one by one — cryptic first, giveaway last.",
+    hard: sv ? "Ordinary streets, no landmarks — and the view is frozen: no walking, no looking around, no zoom."
+             : "Only the two cryptic clues. The giveaway ones never arrive.",
+  };
+  return `${DIFFICULTY[key].label} — ${notes[key]}`;
 }
 
 function setupRound() {
@@ -483,7 +627,9 @@ function setupRound() {
   } else {
     // Clue mode — also the defensive fallback if meta says streetview but we
     // have no key (all clients share one deployment, so this shouldn't happen).
+    $("pano-wrap").classList.add("hidden");
     $("pano").classList.add("hidden");
+    $("pano-lock").classList.add("hidden");
     setPanoStatus("");
     if (r.mode === "streetview" && !hasKey) {
       $("clue-card").classList.remove("hidden");
@@ -505,12 +651,17 @@ function renderClues() {
   if (!r || r.mode !== "clue" || meta.state !== "exploring") return;
   const spot = CLUE_SPOTS[r.locIdx];
   if (!spot) return;
+  const d = diff();
   const dur = meta.settings.guessSeconds * 1000;
-  const elapsed = nowSrv() - (r.endsAt - dur);
-  const revealed = Math.min(4, 1 + Math.floor((elapsed / dur) * 4));
+  // Clamp: a client whose clock reads a hair before the round started would
+  // floor to -1 and show no clues at all for the first moment.
+  const elapsed = Math.max(0, nowSrv() - (r.endsAt - dur));
+  // Hard stops at clue 2 — the giveaway ones never arrive. Easy opens with two
+  // already showing and has all four by halfway.
+  const revealed = Math.min(d.clues, d.openClues + Math.floor((elapsed / dur) * d.clues));
   const ul = $("clue-list");
-  const want = spot.clues.map((c, i) => (i < revealed ? c : null));
-  const key = r.num + ":" + revealed + ":" + r.locIdx;
+  const want = spot.clues.slice(0, d.clues).map((c, i) => (i < revealed ? c : null));
+  const key = r.num + ":" + revealed + ":" + r.locIdx + ":" + d.clues;
   if (ul.dataset.key === key) return;
   ul.dataset.key = key;
   ul.innerHTML = "";
@@ -555,10 +706,7 @@ function renderRevealMap() {
   if (!r || meta.state !== "reveal") return;
   if (!revealMap) {
     revealMap = L.map("reveal-map", { worldCopyJump: true, minZoom: 1 }).setView([22, 10], 1);
-    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "&copy; OpenStreetMap contributors",
-      maxZoom: 19,
-    }).addTo(revealMap);
+    addBasemap(revealMap);
   }
   setTimeout(() => revealMap.invalidateSize(), 60);
   if (revealShownFor === r.num) return;
@@ -661,6 +809,8 @@ $("set-rounds").addEventListener("change", (e) =>
   update(child(metaRef(), "settings"), { rounds: Number(e.target.value) }));
 $("set-seconds").addEventListener("change", (e) =>
   update(child(metaRef(), "settings"), { guessSeconds: Number(e.target.value) }));
+$("set-difficulty").addEventListener("change", (e) =>
+  update(child(metaRef(), "settings"), { difficulty: DIFFICULTY[e.target.value] ? e.target.value : "normal" }));
 $("btn-next-round").addEventListener("click", nextRound);
 
 $("btn-copy-link").addEventListener("click", async () => {
