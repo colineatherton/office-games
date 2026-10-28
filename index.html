@@ -42,6 +42,13 @@
   .decide-tile a { color: var(--accent); text-decoration: none; }
   .decide-tile a:hover { text-decoration: underline; }
   .decide-tile span.why { color: var(--muted); }
+  a.decide-tile {
+    text-decoration: none; color: inherit;
+    border-color: var(--accent); background: rgba(255, 212, 59, .08);
+  }
+  a.decide-tile:hover { background: rgba(255, 212, 59, .16); }
+  a.decide-tile strong { color: var(--accent); }
+  .vote-tile em { color: var(--text); font-style: italic; }
 
   /* Filter bar */
   .filters {
@@ -57,8 +64,9 @@
   .chip:hover { filter: brightness(1.25); }
   .chip.active { background: var(--accent); color: #1a1500; border-color: transparent; font-weight: 600; }
   .filters .sep { color: var(--border); margin: 0 .2rem; }
-  .chip.dice { border-color: var(--accent); color: var(--accent); font-weight: 600; }
-  .chip.dice:hover { background: var(--accent); color: #1a1500; }
+  .chip.dice, .chip.vote { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+  .chip.dice:hover, .chip.vote:hover { background: var(--accent); color: #1a1500; }
+  .chip.vote { text-decoration: none; }
   .chip.dice.rolling { animation: shake .28s linear infinite; }
   @keyframes shake {
     0%, 100% { transform: rotate(-7deg); } 50% { transform: rotate(7deg); }
@@ -132,7 +140,7 @@
 
 <header>
   <h1>🎉 Office <span>Games</span></h1>
-  <p class="tagline">Monthly social hour — bring your A-game. 39 games, zero installs.</p>
+  <p class="tagline">Monthly social hour — bring your A-game. 42 games, zero installs.</p>
   <p class="intro">
     <strong>How it works:</strong> open any game, enter your name, hit <em>Create room</em>,
     and share the 4-letter code (or invite link) in the call chat. Everyone joins from their
@@ -144,6 +152,9 @@
 <div class="decide">
   <h2>🤷 Can't decide?</h2>
   <div class="decide-grid">
+    <a class="decide-tile vote-tile" href="vote/"><strong>🗳️ Put it to a vote</strong>
+      <span class="why">Share a room code and everyone ticks what they'd <em>happily</em> play.
+      Most ticks wins — no more "I don't mind, you choose".</span></a>
     <div class="decide-tile"><strong>First social hour</strong>
       <a href="pictionary/">Pictionary</a> · <a href="herd/">Herd Mentality</a><br>
       <span class="why">Everyone knows the rules in ten seconds.</span></div>
@@ -169,6 +180,7 @@
   <input id="game-search" type="search" placeholder="🔎 Search games…" autocomplete="off"
          style="background:#0e101a;border:1px solid var(--border);border-radius:999px;color:var(--text);font-size:.85rem;padding:.32rem .85rem;width:170px;">
   <button class="chip dice" id="btn-random" title="Pick a random game from whatever's currently shown">🎲 Surprise me</button>
+  <a class="chip vote" href="vote/" title="Open a vote room — the whole call picks the next game">🗳️ Vote on it</a>
   <span class="sep">|</span>
   <button class="chip active" data-f="all">All</button>
   <button class="chip" data-f="teams">🔴🔵 Teams</button>

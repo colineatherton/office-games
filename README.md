@@ -54,6 +54,41 @@ Realtime Database — Google infrastructure, which company networks almost never
 More ideas in [IDEAS.md](IDEAS.md). Each game page explains its own rules;
 quick summaries below.
 
+## 🗳️ Can't decide? Put it to a vote
+
+[**Game Vote**](vote/) is a room like any other — create it, share the 4-letter
+code — except the thing it decides is *which game to play*. It's also linked
+from the homepage ("🗳️ Vote on it", next to the 🎲 dice).
+
+1. **Build a ballot.** Host's choice of three ways: let **everyone nominate**
+   two games each (nominations are folded into one ballot, most-nominated
+   first), roll a **random shortlist**, or **hand-pick** the ballot yourself.
+   Optionally restricted to one format (teams / solo / co-op).
+2. **Everyone votes.** Not "pick your favourite" — tick *everything you'd
+   happily play*, up to the host's budget (1–3). This is approval voting, and
+   it matters: first-past-the-post hands the night to whatever the three
+   loudest people nominated, while approval voting finds the game nobody
+   dreads. You can never tick the whole ballot, so a vote always says something.
+3. **Result.** A bar chart of the ballot with who voted for what, and a big
+   **Play it →** button for the winner — which opens in a new tab, so the vote
+   room is still there for the next round.
+
+**Ties get a ceremony, not a silent tie-break:** the host chooses 🪙 a coin
+flip or ⚔️ a runoff between the tied games (one pick each). And the room
+remembers what it has **played tonight**, hiding those games from later ballots
+until someone clears the list — so a social hour can live in one room all
+evening.
+
+Needs 2+ people. Everything else works like the games: host-driven, survives
+reconnects, and the host role passes on if the host disappears.
+
+> **Adding a new game?** It needs three things kept in sync: the card in
+> `index.html`, the row in the table above, and an entry in
+> [`games.js`](games.js) (the machine-readable catalogue the vote page reads).
+> `node vote/validate-catalogue.mjs` checks all three match — and that the
+> folder actually exists. `node vote/test-tally.mjs` covers the vote
+> arithmetic, and `node emoji/validate-palette.mjs` the emoji palette.
+
 ---
 
 ## One-time setup (≈5 minutes, free, no credit card)

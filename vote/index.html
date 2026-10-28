@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game Vote — Office Games</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Shown only if firebase-config.js hasn't been filled in -->
+  <div id="screen-setup" class="screen hidden">
+    <div class="panel">
+      <h1>🗳️ Game Vote</h1>
+      <h2>One-time setup needed</h2>
+      <p>This page syncs voters through a free Firebase Realtime Database, and the
+         config hasn't been filled in yet.</p>
+      <ol>
+        <li>Go to <strong>console.firebase.google.com</strong> and create a project.</li>
+        <li>Build → <strong>Realtime Database</strong> → Create database → <strong>test mode</strong>.</li>
+        <li>Project settings → Your apps → add a <strong>Web app</strong>.</li>
+        <li>Copy the config object into <code>firebase-config.js</code> (repo root).</li>
+      </ol>
+      <p>Full walkthrough in the README. Takes about 5 minutes, free, no credit card.</p>
+    </div>
+  </div>
+
+  <!-- Join / create room -->
+  <div id="screen-join" class="screen hidden">
+    <div class="panel">
+      <h1>🗳️ Game Vote</h1>
+      <p class="tagline">let the room pick · no more "I don't mind, you choose"</p>
+      <label for="name-input">Your name</label>
+      <input id="name-input" maxlength="16" placeholder="e.g. Colin" autocomplete="off">
+      <label for="code-input">Room code</label>
+      <input id="code-input" maxlength="4" placeholder="ABCD" autocomplete="off" style="text-transform:uppercase">
+      <div class="btn-row">
+        <button id="btn-join" class="btn primary">Join vote</button>
+        <button id="btn-create" class="btn">Start a new vote</button>
+      </div>
+      <p id="join-error" class="error hidden"></p>
+      <p class="hint">Just you? The homepage has a <a href="../#filters">🎲 Surprise me</a> dice instead.</p>
+    </div>
+  </div>
+
+  <!-- Lobby -->
+  <div id="screen-lobby" class="screen hidden">
+    <div class="panel wide">
+      <h1>🗳️ Game Vote</h1>
+      <div class="room-code-row">
+        <span>Room code:</span>
+        <strong id="lobby-code">----</strong>
+        <button id="btn-copy-link" class="btn small">Copy invite link</button>
+      </div>
+      <div class="how-to">
+        <strong>How it works:</strong> the room gets a shortlist of games, then everyone
+        ticks <em>everything they'd happily play</em> — not just one favourite. Most ticks
+        wins, so the game nobody objects to beats the game three people love and four
+        people dread. Ties go to a coin flip or a runoff, host's call.
+      </div>
+      <div class="lobby-players-box">
+        <h3>In the room <span id="lobby-count"></span></h3>
+        <ul id="lobby-player-list"></ul>
+      </div>
+      <div id="played-box" class="played-box hidden">
+        <h3>Played tonight</h3>
+        <div id="played-list" class="played-list"></div>
+        <button id="btn-clear-played" class="btn small ghost hidden">Clear the list</button>
+      </div>
+      <p id="lobby-summary" class="hint"></p>
+      <div id="lobby-host-controls" class="hidden">
+        <div class="settings-row">
+          <label>Shortlist
+            <select id="set-source">
+              <option value="nominate">Everyone nominates</option>
+              <option value="shuffle">🎲 Random shortlist</option>
+              <option value="handpick">I'll pick the ballot</option>
+            </select>
+          </label>
+          <label id="lbl-count">Ballot size
+            <select id="set-count">
+              <option value="4">4 games</option>
+              <option value="5">5 games</option>
+              <option value="6" selected>6 games</option>
+              <option value="8">8 games</option>
+            </select>
+          </label>
+          <label>Only
+            <select id="set-filter">
+              <option value="all">Any format</option>
+              <option value="teams">🔴🔵 Teams</option>
+              <option value="solo">🙋 Solo scores</option>
+              <option value="coop">🤝 Co-op</option>
+            </select>
+          </label>
+          <label>Votes each
+            <select id="set-votes">
+              <option value="1">1 — favourite only</option>
+              <option value="2" selected>2</option>
+              <option value="3">3</option>
+            </select>
+          </label>
+          <label>Timer
+            <select id="set-timer">
+              <option value="30">30 s</option>
+              <option value="45" selected>45 s</option>
+              <option value="60">60 s</option>
+              <option value="0">No timer</option>
+            </select>
+          </label>
+        </div>
+        <label class="check">
+          <input type="checkbox" id="set-skip" checked>
+          Hide games we've already played tonight
+        </label>
+        <div id="handpick-box" class="hidden">
+          <h3 class="pick-heading">Your ballot <span id="handpick-count" class="counter"></span></h3>
+          <div id="handpick-picker" class="picker"></div>
+        </div>
+        <button id="btn-start" class="btn primary big">🗳️ Open the vote</button>
+        <p class="hint">Needs at least 2 people in the room.</p>
+      </div>
+      <p id="lobby-waiting" class="hint hidden">Waiting for the host to open the vote…</p>
+      <button id="btn-leave-lobby" class="btn small ghost">Leave room</button>
+    </div>
+  </div>
+
+  <!-- Active vote -->
+  <div id="screen-game" class="screen hidden">
+    <header id="game-top">
+      <div id="round-info">&nbsp;</div>
+      <div id="top-label">&nbsp;</div>
+      <div id="timer">--</div>
+    </header>
+
+    <div id="center">
+
+      <!-- Nominating -->
+      <div id="view-nominate" class="task-view hidden">
+        <div class="panel wide">
+          <h2 id="nominate-title">Nominate up to 2 games</h2>
+          <p class="hint">Everyone's nominations become the ballot. Nominate what you'd
+             actually want to play — you'll get to vote on the final list next.</p>
+          <div id="nominate-picker" class="picker"></div>
+          <div class="submit-row">
+            <span id="nominate-count" class="counter"></span>
+            <button id="btn-nominate" class="btn primary">Submit nominations</button>
+          </div>
+          <button id="btn-close-noms" class="btn small ghost hidden">⏭ Close nominations now</button>
+        </div>
+      </div>
+
+      <!-- Voting -->
+      <div id="view-vote" class="task-view hidden">
+        <div class="panel wide">
+          <h2 id="vote-title">Tick everything you'd happily play</h2>
+          <p id="vote-sub" class="hint"></p>
+          <div id="ballot" class="ballot"></div>
+          <div class="submit-row">
+            <span id="vote-count" class="counter"></span>
+            <button id="btn-vote" class="btn primary">Lock in my vote 🗳️</button>
+          </div>
+          <button id="btn-close-vote" class="btn small ghost hidden">⏭ Close the vote now</button>
+        </div>
+      </div>
+
+      <!-- Submitted, waiting for the rest -->
+      <div id="view-wait" class="task-view hidden">
+        <div class="panel">
+          <h2 id="wait-title">✅ Locked in!</h2>
+          <p id="wait-sub" class="hint"></p>
+          <ul id="wait-list"></ul>
+          <button id="btn-close-wait" class="btn small ghost hidden">⏭ Don't wait — close it now</button>
+        </div>
+      </div>
+
+      <!-- Result -->
+      <div id="view-reveal" class="task-view hidden">
+        <div class="panel wide">
+          <div id="winner-box" class="winner-box hidden">
+            <span id="winner-emoji" class="winner-emoji"></span>
+            <h2 id="winner-title"></h2>
+            <p id="winner-blurb" class="winner-blurb"></p>
+            <p id="winner-how" class="hint"></p>
+            <a id="winner-link" class="btn primary big" href="#" target="_blank" rel="noopener">Play it →</a>
+            <p class="hint">Opens in a new tab — this vote room stays here for the next round.</p>
+          </div>
+          <div id="tie-box" class="tie-box hidden">
+            <h2 id="tie-title">🤝 It's a tie!</h2>
+            <p id="tie-sub" class="hint"></p>
+            <div id="tie-host" class="btn-row hidden">
+              <button id="btn-coin" class="btn primary">🪙 Flip a coin</button>
+              <button id="btn-runoff" class="btn">⚔️ Run a runoff</button>
+            </div>
+            <p id="tie-waiting" class="hint hidden">Waiting for the host to break the tie…</p>
+          </div>
+          <h3 id="results-heading" class="results-heading">The ballot</h3>
+          <div id="results" class="results"></div>
+          <div id="reveal-host" class="btn-row hidden">
+            <button id="btn-again" class="btn">🗳️ Pick another game</button>
+          </div>
+          <p id="reveal-waiting" class="hint hidden">The host can start another vote whenever you're done.</p>
+          <button id="btn-leave-reveal" class="btn small ghost">Leave room</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
