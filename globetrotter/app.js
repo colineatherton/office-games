@@ -73,8 +73,7 @@ const wrapLng = (lng) => ((lng + 180) % 360 + 360) % 360 - 180;
 //   pools   which Street View lists the round is drawn from ("s" = famous
 //           landmarks, "o" = offbeat towns — see locations.js)
 //   frozen  no walking, no panning, no zooming: one fixed view, GeoGuessr's
-//           NMPZ. Street View offers no option for "don't let them drag", so
-//           the pano gets a transparent lid (#pano-lock) that eats the events.
+//           NMPZ. See setFrozen for how dragging is blocked.
 //   clues / openClues  clue mode: how many of the four clues ever appear, and
 //           how many are on screen at the start. Hard never reaches the
 //           giveaway clue — you get the two cryptic ones and your wits.
@@ -402,6 +401,31 @@ function clearPin() {
 }
 
 // ── Street View ───────────────────────────────────────────────────────────────
+// ── Frozen view (Hard mode) ───────────────────────────────────────────────────
+// Street View has options for links, click-to-go and scroll, but none for
+// "don't let them drag to look around". The obvious trick — a transparent lid
+// over the panorama — works, but putting another layer on top of the WebGL
+// canvas made it composite black in testing. So instead the container itself
+// swallows input events in the capture phase, before Street View's own
+// handlers (which live on inner elements) ever see them. No extra layer, no
+// compositing surprises, same result.
+let panoFrozen = false;
+const FROZEN_EVENTS = ["pointerdown", "mousedown", "mouseup", "click", "dblclick",
+  "wheel", "touchstart", "touchmove", "contextmenu", "keydown"];
+for (const type of FROZEN_EVENTS) {
+  $("pano").addEventListener(type, (e) => {
+    if (!panoFrozen) return;
+    e.stopPropagation();
+    e.preventDefault();
+  }, { capture: true, passive: false });
+}
+
+function setFrozen(frozen) {
+  panoFrozen = frozen;
+  $("pano").classList.toggle("frozen", frozen);
+  $("pano-lock").classList.toggle("hidden", !frozen);
+}
+
 // Google calls this when it rejects the key — almost always because the key's
 // referrer restrictions don't list the site it's running on (see
 // maps-config.js). Without it the game looks like it merely can't find
@@ -480,7 +504,7 @@ async function initPano(spot, forRound) {
       zoomControl: !frozen,
       disableDoubleClickZoom: frozen,
     });
-    $("pano-lock").classList.toggle("hidden", !frozen);
+    setFrozen(frozen);
 
     svService = svService || new g.maps.StreetViewService();
     const res = await findPano(g, spot);
@@ -631,7 +655,7 @@ function setupRound() {
     // have no key (all clients share one deployment, so this shouldn't happen).
     $("pano-wrap").classList.add("hidden");
     $("pano").classList.add("hidden");
-    $("pano-lock").classList.add("hidden");
+    setFrozen(false);
     setPanoStatus("");
     if (r.mode === "streetview" && !hasKey) {
       $("clue-card").classList.remove("hidden");

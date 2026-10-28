@@ -58,7 +58,9 @@
         drops a pin on the world map before the clock runs out. Scoring is
         GeoGuessr-style: up to <em>5,000 points</em>, falling off the further your
         pin is from the truth. Closest pin gets the 🎯. Highest total after all
-        rounds is the 🌍 Globetrotter. The host picks the mode, rounds, and timer.
+        rounds is the 🌍 Globetrotter. The host picks the mode, difficulty, rounds
+        and timer — on 💀 Hard you're dropped on an anonymous street with the view
+        frozen: no walking, no looking around, no zoom.
       </div>
       <div class="lobby-players-box">
         <h3>Players</h3>
@@ -120,8 +122,9 @@
         <div id="explore-panel">
           <div id="pano-wrap">
             <div id="pano" class="hidden"></div>
-            <!-- Hard mode's lid: Street View has no "disable dragging" option,
-                 so a transparent layer swallows drags, clicks and scrolls. -->
+            <!-- Hard mode's badge; the dragging block itself is in app.js
+                 (setFrozen), because covering the panorama with a layer made
+                 its WebGL canvas composite black. -->
             <div id="pano-lock" class="hidden" title="Frozen view — hard mode">
               <span class="lock-badge">🧊 Frozen view</span>
             </div>

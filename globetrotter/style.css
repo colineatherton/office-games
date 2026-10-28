@@ -154,13 +154,14 @@ input:focus, select:focus { outline: 2px solid var(--accent); border-color: tran
   border-radius: 12px; overflow: hidden;
   background: #0e101a;
 }
-/* Hard mode's lid — sits over the panorama and eats drags, clicks and scroll,
-   because Street View has no option for "look but don't touch". */
+/* Hard mode's badge. Deliberately NOT a full-size lid: an element covering the
+   panorama made its WebGL canvas composite black. Input is blocked in JS
+   instead (see setFrozen), so this is purely a label. */
 #pano-lock {
-  position: absolute; inset: 0; z-index: 5;
-  border-radius: 12px; cursor: not-allowed;
-  display: flex; align-items: flex-start; justify-content: flex-end; padding: .6rem;
+  position: absolute; top: .6rem; right: .6rem; z-index: 5;
+  pointer-events: none;
 }
+#pano.frozen { cursor: not-allowed; }
 .lock-badge {
   background: rgba(14, 16, 26, .82); border: 1px solid var(--border);
   border-radius: 999px; padding: .25rem .75rem; font-size: .8rem;
