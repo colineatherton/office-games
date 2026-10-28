@@ -48,6 +48,8 @@ let revealShownFor = -1;
 let guessMap = null, guessPin = null;
 let revealMap = null, revealLayer = null;
 let gmapsPromise = null, pano = null, svService = null;
+// Which frozen-ness the live panorama was constructed with (see initPano).
+let panoBuiltFrozen = null;
 // Consecutive Street View lookups that came back with nothing. A couple is
 // normal (coverage moves); a run of them means the key or its restrictions are
 // wrong, and shuffling locations forever would hide that.
@@ -484,7 +486,13 @@ async function initPano(spot, forRound) {
   try {
     const g = await loadGoogleMaps();
     if (meta?.round?.num !== forRound || meta?.state !== "exploring") return;
-    if (!pano) {
+    // The controls are decided when the panorama is BUILT, never with
+    // setOptions on a live one: toggling the pan/zoom controls off mid-life
+    // relayouts the viewer, and that left the WebGL canvas painting pure black
+    // (measured: brightness 0.3 vs 157 for the same spot built the same way in
+    // one go). Difficulty is fixed for a game, so this builds at most twice.
+    if (!pano || panoBuiltFrozen !== frozen) {
+      $("pano").innerHTML = "";
       pano = new g.maps.StreetViewPanorama($("pano"), {
         visible: true,
         addressControl: false,
@@ -493,17 +501,15 @@ async function initPano(spot, forRound) {
         enableCloseButton: false,
         motionTracking: false,
         motionTrackingControl: false,
+        linksControl: !frozen,
+        clickToGo: !frozen,
+        scrollwheel: !frozen,
+        panControl: !frozen,
+        zoomControl: !frozen,
+        disableDoubleClickZoom: frozen,
       });
+      panoBuiltFrozen = frozen;
     }
-    // Hard mode: no walking, no zooming, and the lid below kills dragging.
-    pano.setOptions({
-      linksControl: !frozen,
-      clickToGo: !frozen,
-      scrollwheel: !frozen,
-      panControl: !frozen,
-      zoomControl: !frozen,
-      disableDoubleClickZoom: frozen,
-    });
     setFrozen(frozen);
 
     svService = svService || new g.maps.StreetViewService();
