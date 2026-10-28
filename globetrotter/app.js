@@ -539,8 +539,10 @@ function render() {
   $("round-info").textContent = r ? `Round ${r.num}/${meta.settings.rounds}` : "";
 
   if (meta.state === "exploring") {
-    setupRound();
+    // Show the view first: a Street View panorama built inside a hidden,
+    // zero-height container has to wait for a resize before it paints.
     showView("explore");
+    setupRound();
     $("mode-label").textContent =
       r.mode !== "streetview" ? "🕵️ Read the clues… where is it?"
       : diff().frozen ? "🧊 One frozen view — no moving, no looking around"
