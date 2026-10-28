@@ -48,8 +48,6 @@ let revealShownFor = -1;
 let guessMap = null, guessPin = null;
 let revealMap = null, revealLayer = null;
 let gmapsPromise = null, pano = null, svService = null;
-// Which frozen-ness the live panorama was constructed with (see initPano).
-let panoBuiltFrozen = null;
 // Consecutive Street View lookups that came back with nothing. A couple is
 // normal (coverage moves); a run of them means the key or its restrictions are
 // wrong, and shuffling locations forever would hide that.
@@ -486,41 +484,42 @@ async function initPano(spot, forRound) {
   try {
     const g = await loadGoogleMaps();
     if (meta?.round?.num !== forRound || meta?.state !== "exploring") return;
-    // The controls are decided when the panorama is BUILT, never with
-    // setOptions on a live one: toggling the pan/zoom controls off mid-life
-    // relayouts the viewer, and that left the WebGL canvas painting pure black
-    // (measured: brightness 0.3 vs 157 for the same spot built the same way in
-    // one go). Difficulty is fixed for a game, so this builds at most twice.
-    if (!pano || panoBuiltFrozen !== frozen) {
-      $("pano").innerHTML = "";
-      pano = new g.maps.StreetViewPanorama($("pano"), {
-        visible: true,
-        addressControl: false,
-        showRoadLabels: false,
-        fullscreenControl: false,
-        enableCloseButton: false,
-        motionTracking: false,
-        motionTrackingControl: false,
-        linksControl: !frozen,
-        clickToGo: !frozen,
-        scrollwheel: !frozen,
-        panControl: !frozen,
-        zoomControl: !frozen,
-        disableDoubleClickZoom: frozen,
-      });
-      panoBuiltFrozen = frozen;
-    }
-    setFrozen(frozen);
 
+    // Find the panorama FIRST, then build the viewer around it. The obvious
+    // order — construct an empty viewer, then setPano() when the lookup
+    // returns — renders a permanently black canvas here: measured 0.2 mean
+    // brightness for a whole game, while rebuilding the very same container,
+    // with the very same panorama id and options, in a single constructor call
+    // gives 118. Nothing in between (the badge, the frozen class, the control
+    // options) made any difference; only the two-step construction did.
+    //
+    // A fresh viewer per round also means the controls are never toggled on a
+    // live one, which is a second thing Street View dislikes.
     svService = svService || new g.maps.StreetViewService();
     const res = await findPano(g, spot);
     if (meta?.round?.num !== forRound || meta?.state !== "exploring") return;
     if (!res) throw new Error("no imagery");
 
-    pano.setPano(res.data.location.pano);
-    pano.setPov({ heading: meta.round.heading || 0, pitch: 0 });
-    pano.setZoom(0);
-    pano.setVisible(true);
+    $("pano").innerHTML = "";
+    pano = new g.maps.StreetViewPanorama($("pano"), {
+      pano: res.data.location.pano,
+      pov: { heading: meta.round.heading || 0, pitch: 0 },
+      zoom: 0,
+      visible: true,
+      addressControl: false,
+      showRoadLabels: false,
+      fullscreenControl: false,
+      enableCloseButton: false,
+      motionTracking: false,
+      motionTrackingControl: false,
+      linksControl: !frozen,
+      clickToGo: !frozen,
+      scrollwheel: !frozen,
+      panControl: !frozen,
+      zoomControl: !frozen,
+      disableDoubleClickZoom: frozen,
+    });
+    setFrozen(frozen);
     setPanoStatus("");
     panoFails = 0;
   } catch (e) {
